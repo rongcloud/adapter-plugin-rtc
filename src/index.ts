@@ -2,8 +2,12 @@ import { LogLevel } from '@rongcloud/engine'
 
 import { IRTCAdapterOptions } from './interfaces/IRTCAdapterOptions'
 import logger from './logger'
+import { Device } from './modules/Device'
+import { Message } from './modules/Message'
+import { Monitor } from './modules/Monitor'
 import { Room } from './modules/Room'
 import { Stream } from './modules/Stream'
+import { Storage } from './modules/Storage'
 import { RTCClientCtrl } from './RTCClientM'
 
 export * from './enums'
@@ -11,7 +15,11 @@ export * from './enums'
 // 导出模块
 export {
   Room,
-  Stream
+  Stream,
+  Device,
+  Message,
+  Monitor,
+  Storage
 }
 
 export function init (options: IRTCAdapterOptions) {
