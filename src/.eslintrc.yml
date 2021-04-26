@@ -1,0 +1,23 @@
+env:
+  browser: true
+  es2020: true
+extends:
+  - standard
+root: true
+globals:
+  # 编译变量
+  __COMMIT_ID__: true
+  __VERSION__: true
+  __DEV__: true
+parser: '@typescript-eslint/parser'
+parserOptions:
+  ecmaVersion: 11
+  sourceType: module
+plugins:
+  - '@typescript-eslint'
+rules: {
+  no-unused-vars: 0,
+  no-useless-constructor: 0,
+  prefer-promise-reject-errors: 0,
+  no-useless-return: 'warn'
+}
