@@ -6,6 +6,7 @@ extends:
 root: true
 globals:
   # 编译变量
+  __NAME__: true
   __COMMIT_ID__: true
   __VERSION__: true
   __DEV__: true

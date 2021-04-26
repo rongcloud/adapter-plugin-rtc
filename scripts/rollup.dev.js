@@ -31,11 +31,8 @@ const globals = {
 const consts = {
   __COMMIT_ID__: JSON.stringify(commitId),
   __VERSION__: JSON.stringify(pkg.version),
-  __RUNTIME_TAG_WECHAT__: JSON.stringify('wechat'),
-  __RUNTIME_TAG_BROWSER__: JSON.stringify('browser'),
-  __RUNTIME_TAG_ELECTRON__: JSON.stringify('electron'),
-  __RUNTIME_TAG_UNIAPP__: JSON.stringify('uniapp'),
-  __RUNTIME_TAG_ALIPAY__: JSON.stringify('alipay')
+  __DEV__: true,
+  __NAME__: JSON.stringify(attrs.globals)
 }
 
 module.exports = [

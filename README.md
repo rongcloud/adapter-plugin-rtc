@@ -8,15 +8,15 @@
 
 ```typescript
 import RongIMLib from '@rongcloud/imlib-v2'
-import { installer, RCRTCClient, IRCRTCClientOption } from '@rongcloud/plugin-rtc'
-import RongRTCAdapter, { Mode, LiveType, ROLE } from '@rongcloud/rtc-v3-adapter'
+import { installer, RCRTCClient } from '@rongcloud/plugin-rtc'
+import { Mode, LiveType, ROLE, RongRTC } from '@rongcloud/rtc-v3-adapter'
 
 // im 客户端初始化
 const imClient = RongIMLib.init()
 // rtc v5 客户端初始化
 const rtcClient: RCRTCClient = imClient.install(installer, { ...options })
 // 初始化 RongRTC，其他不再支持
-const rongRTC = new RongRTC({ rtcClient, bitrate, liveRole?, mode?, liveType? })
+const rongRTC = new RongRTC({ rtcClient, bitrate, debug, logger, liveRole?, mode?, liveType? })
 // 取模块
 const { Room, Stream, Message, Device, Storage, StreamType, StreamSize } = rongRTC;
 ```
