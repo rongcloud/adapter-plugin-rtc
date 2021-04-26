@@ -8,17 +8,23 @@
 
 ```typescript
 import RongIMLib from '@rongcloud/imlib-v2'
-import { installer, RCRTCClient } from '@rongcloud/plugin-rtc'
-import { Mode, LiveType, ROLE, RongRTC } from '@rongcloud/rtc-v3-adapter'
+import { installer, RCRTCClient, IRCRTCClientOption } from '@rongcloud/plugin-rtc'
+import * as RongRTCAdapter, { Mode, LiveType, ROLE } from '@rongcloud/rtc-v3-adapter'
 
-// im 客户端初始化
-const imClient = RongIMLib.init()
+// IM 客户端初始化，此处以 IMLib 2.8 举例
+const imClient = RongIMLib.init(appkey, null, { ...options })
 // rtc v5 客户端初始化
 const rtcClient: RCRTCClient = imClient.install(installer, { ...options })
-// 初始化 RongRTC，其他不再支持
-const rongRTC = new RongRTC({ rtcClient, bitrate, debug, logger, liveRole?, mode?, liveType? })
-// 取模块
-const { Room, Stream, Message, Device, Storage, StreamType, StreamSize } = rongRTC;
+
+// 初始化方式变更，不再使用 `new RongRTC()`，同时需要传递 RCRTCClient 实例
+RongRTCAdapter.init({ client: rtcClient, bitrate, liveRole?, mode?, liveType? })
+
+// 由于初始化方式变更，故模块获取方式也需要变更，现在直接通过 RongRTCAdapter 顶级变量获取
+const { Room, Stream, Message, Device, Storage, StreamType, StreamSize } = RongRTCAdapter;
+
+// 反初始化，相当于原 `rongRTC.destroy()`
+// 为避免内存泄露，使用该方法后，已初始化的所有功能模块将失效
+RongRTCAdapter.uninit()
 ```
 
 ##### Room
