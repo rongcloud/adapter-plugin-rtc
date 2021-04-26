@@ -22,6 +22,10 @@ export {
   Storage
 }
 
+export {
+  IRTCAdapterOptions
+}
+
 export function init (options: IRTCAdapterOptions) {
   if (!options || !options.client) {
     logger.error(`${__NAME__} init failed -> \`client\` is invalid.`)
@@ -39,6 +43,9 @@ export function init (options: IRTCAdapterOptions) {
 
   logger.warn(`${__NAME__} Version: ${__VERSION__}, CommitId: ${__COMMIT_ID__}`)
   RTCClientCtrl.init(options)
+}
+
+export function becameAuchor () {
 }
 
 export function destroy () {
