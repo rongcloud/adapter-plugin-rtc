@@ -23,7 +23,7 @@ npm i @rongcloud/adapter-plugin-rtc
 ```typescript
 import RongIMLib from '@rongcloud/imlib-v2'
 import { installer, RCRTCClient, IRCRTCClientOption } from '@rongcloud/plugin-rtc'
-import RongRTCAdapter, { Mode, LiveType, ROLE } from '@rongcloud/rtc-v3-adapter'
+import * as RongRTCAdapter, { Mode, LiveType, ROLE } from '@rongcloud/rtc-v3-adapter'
 
 // IM 客户端初始化，此处以 IMLib 2.8 举例
 const imClient = RongIMLib.init(appkey, null, { ...options })
@@ -35,6 +35,9 @@ RongRTCAdapter.init({ client: rtcClient, bitrate, liveRole?, mode?, liveType? })
 
 // 由于初始化方式变更，故模块获取方式也需要变更，现在直接通过 RongRTCAdapter 顶级变量获取
 const { Room, Stream, Message, Device, Storage, StreamType, StreamSize } = RongRTCAdapter;
+
+// 观众上麦，替换 rongRTC.changeLiveRole 接口，接口不接收参数
+RongRTCAdapter.becameAuchor()
 
 // 反初始化，相当于原 `rongRTC.destroy()`
 // 为避免内存泄露，使用该方法后，已初始化的所有功能模块将失效
