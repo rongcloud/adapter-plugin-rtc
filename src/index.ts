@@ -9,8 +9,7 @@ import { Stream } from './modules/Stream'
 import { Storage } from './modules/Storage'
 import { RTCClientCtrl } from './RTCClientCtrl'
 
-export { Mode, ROLE } from './enums'
-export { RCLivingType as LiveType } from '@rongcloud/plugin-rtc'
+export { Mode, ROLE, LiveType } from './enums'
 
 // 导出模块
 export {

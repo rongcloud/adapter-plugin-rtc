@@ -1,3 +1,5 @@
+export { RCLivingType as LiveType } from '@rongcloud/plugin-rtc'
+
 export enum Mode {
   RTC = 0,
   LIVE = 2

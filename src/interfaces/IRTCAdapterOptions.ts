@@ -1,5 +1,5 @@
-import { RCLivingType, RCRTCClient } from '@rongcloud/plugin-rtc'
-import { Mode, ROLE } from '../enums'
+import { RCRTCClient } from '@rongcloud/plugin-rtc'
+import { Mode, ROLE, LiveType } from '../enums'
 
 export interface IRTCAdapterOptions {
   client: RCRTCClient
@@ -8,5 +8,5 @@ export interface IRTCAdapterOptions {
   logger?: (msg: string) => void
   liveRole?: ROLE
   mode?: Mode
-  liveType?: RCLivingType
+  liveType?: LiveType
 }
