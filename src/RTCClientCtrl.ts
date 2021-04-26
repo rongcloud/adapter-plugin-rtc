@@ -1,5 +1,6 @@
 import { EventEmitter } from '@rongcloud/engine'
-import { RCRTCClient } from '@rongcloud/plugin-rtc'
+import { RCLivingType, RCRTCClient } from '@rongcloud/plugin-rtc'
+import { Mode } from './enums'
 import { IRTCAdapterOptions } from './interfaces/IRTCAdapterOptions'
 
 export class RTCClientCtrl extends EventEmitter {
@@ -23,10 +24,17 @@ export class RTCClientCtrl extends EventEmitter {
 
   private readonly _client: RCRTCClient
 
-  constructor (options: IRTCAdapterOptions) {
+  constructor (private _options: IRTCAdapterOptions) {
     super()
 
-    this._client = options.client
+    this._client = _options.client
+  }
+
+  join (roomId: string) {
+    if (this._options.mode === Mode.LIVE) {
+      return this._client.joinLivingRoom(roomId, this._options.liveType || 0)
+    }
+    return this._client.joinRTCRoom(roomId)
   }
 
   private destroy () {

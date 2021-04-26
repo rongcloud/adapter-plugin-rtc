@@ -1,5 +1,4 @@
 import { LogLevel } from '@rongcloud/engine'
-
 import { IRTCAdapterOptions } from './interfaces/IRTCAdapterOptions'
 import logger from './logger'
 import { Device } from './modules/Device'
@@ -8,9 +7,10 @@ import { Monitor } from './modules/Monitor'
 import { Room } from './modules/Room'
 import { Stream } from './modules/Stream'
 import { Storage } from './modules/Storage'
-import { RTCClientCtrl } from './RTCClientM'
+import { RTCClientCtrl } from './RTCClientCtrl'
 
-export * from './enums'
+export { Mode, ROLE } from './enums'
+export { RCLivingType as LiveType } from '@rongcloud/plugin-rtc'
 
 // 导出模块
 export {

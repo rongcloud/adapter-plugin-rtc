@@ -1,5 +1,5 @@
 import logger from '../logger'
-import { RTCClientCtrl } from '../RTCClientM'
+import { RTCClientCtrl } from '../RTCClientCtrl'
 
 export class BasicModule {
   protected _ctrl?: RTCClientCtrl
