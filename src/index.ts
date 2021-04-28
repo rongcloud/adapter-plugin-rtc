@@ -45,6 +45,7 @@ export function init (options: IRTCAdapterOptions) {
 }
 
 export function becameAuchor () {
+  throw new Error('TODO -> becameAuchor')
 }
 
 export function destroy () {

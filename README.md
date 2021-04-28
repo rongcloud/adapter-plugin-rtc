@@ -27,7 +27,7 @@ RongRTCAdapter.becameAuchor()
 
 // 反初始化，相当于原 `rongRTC.destroy()`
 // 为避免内存泄露，使用该方法后，已初始化的所有功能模块将失效
-RongRTCAdapter.uninit()
+RongRTCAdapter.destroy()
 ```
 
 ##### Room
