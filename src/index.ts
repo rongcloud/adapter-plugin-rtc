@@ -9,7 +9,7 @@ import { Stream } from './modules/Stream'
 import { Storage } from './modules/Storage'
 import { RTCClientCtrl } from './RTCClientCtrl'
 
-export { Mode, ROLE, LiveType } from './enums'
+export * from './enums'
 
 // 导出模块
 export {

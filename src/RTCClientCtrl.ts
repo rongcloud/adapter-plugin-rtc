@@ -32,7 +32,7 @@ export class RTCClientCtrl extends EventEmitter {
 
   join (roomId: string) {
     if (this._options.mode === Mode.LIVE) {
-      return this._client.joinLivingRoom(roomId, this._options.liveType || 0)
+      return this._client.joinLivingRoom(roomId, (this._options.liveType || 0) as RCLivingType)
     }
     return this._client.joinRTCRoom(roomId)
   }

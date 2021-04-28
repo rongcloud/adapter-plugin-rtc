@@ -2,65 +2,66 @@
 
 ##### RongRTCAdapter（index.ts）
 
-* [  ] Room
-* [  ] Stream
-* [  ] Message
-* [  ] Device
-* [  ] Storage
-* [  ] Monitor
-* [  ] StreamType
-* [  ] StreamSize
-* [  ] Mode
-* [  ] ROLE
-* [  ] LiveType
-* [  ] LayoutMode
-* [  ] RenderMode
-* [  ] Resolution
-* [  ] RongRTCVideoFps
-* [  ] StorageType
+* ✅ StreamType
+* ✅ StreamSize
+* ✅ Mode
+* ✅ ROLE
+* ✅ LiveType
+* ✅ LayoutMode
+* ✅ RenderMode
+* ✅ Resolution
+* ✅ RongRTCVideoFps
+* ✅ StorageType
 ---
-* [  ] init()
-* [  ] destroy()
-* [  ] becameAuchor()
+* ⭕️ Room
+* ⭕️ Stream
+* ⭕️ Message
+* ⭕️ Device
+* ⭕️ Storage
+* ⭕️ Monitor
+---
+* ⭕️ init()
+* ⭕️ destroy()
+* ⭕️ becameAuchor()
 
 ##### Room
 
-* [  ] constructor()
-* [  ] join()
-* [  ] leave()
-* [  ] get()
+* ⭕️ constructor()
+* ⭕️ join()
+* ⭕️ leave()
+* ⭕️ get()
 
 ##### Stream
 
-* [  ] constructor()
-* [  ] get()
-* [  ] publish()
-* [  ] unpublish()
-* [  ] subscribe()
-* [  ] unsubscribe()
-* [  ] video.disable()
-* [  ] video.enable()
-* [  ] audio.mute()
-* [  ] audio.ummute()
-* [  ] resize()
+* ⭕️ constructor()
+* ⭕️ get()
+* ⭕️ publish()
+* ⭕️ unpublish()
+* ⭕️ subscribe()
+* ⭕️ unsubscribe()
+* ⭕️ video.disable()
+* ⭕️ video.enable()
+* ⭕️ audio.mute()
+* ⭕️ audio.ummute()
+* ⭕️ resize()
 
 #### Device
 
-* [  ] constructor()
-* [  ] get()
+* ⭕️ constructor()
+* ⭕️ get()
 
 #### Monitor
 
-* [  ] constructor()
+* ⭕️ constructor()
 
 #### Message
 
-* [  ] constructor()
-* [  ] send()
+* ⭕️ constructor()
+* ⭕️ send()
 
 #### Storage
 
-* [  ] constructor()
-* [  ] set()
-* [  ] get()
-* [  ] remove()
+* ⭕️ constructor()
+* ⭕️ set()
+* ⭕️ get()
+* ⭕️ remove()
