@@ -1,29 +1,39 @@
-# @rongcloud/adapter-plugin-rtc
+# RongRTCAdapter
 
 为融云 RTCLib v3 用户提供的桥接方案，以便于用户最小化改动的情况下可以直接升级至 RTCLib v5 - `@rongcloud/plugin-rtc`
 
-## 依赖安装
+### 依赖安装
 
-* 使用 RongIMLib v2 的开发者需升级至 RongIMLib v2.8 以上 - `npm i @rongcloud/imlib-v2@latest`
-* 使用 RongIMLib v3 及 v4 的开发者需升级至 RongIMLib v4.3 以上 - `npm i @rongcloud/imlib-v4@latest`
-* 需安装 RTCLib v5 版本 - `npm i @rongcloud/plugin-rtc@latest`
+* 使用 RongIMLib v2 的开发者需升级至 RongIMLib v2.8 以上
+  ```shell
+  npm i @rongcloud/imlib-v2
+  ```
+* 使用 RongIMLib v3 及 v4 的开发者需升级至 RongIMLib v4.3 以上
+  ```shell
+  npm i @rongcloud/imlib-v4
+  ```
+* 需安装 RTCLib v5 版本
+  ```shell
+  npm i @rongcloud/plugin-rtc
+  ```
 
-## 安装桥接模块
+### 安装 RongRTCAdapter
 
 ```shell
 npm i @rongcloud/adapter-plugin-rtc
 ```
 
-## CHANGE
+### CHANGE
 
-以下列出的是相较于老版本 RongRTC-v3，使用桥阶模块所需要进行的修改内容
+以下列出的是相较于老版本 RongRTC-v3，使用桥阶层所需要进行的修改内容
 
-##### init
+##### Init
 
 ```typescript
+// 以 RongIMLib v2 举例
 import RongIMLib from '@rongcloud/imlib-v2'
-import { installer, RCRTCClient, IRCRTCClientOption } from '@rongcloud/plugin-rtc'
-import * as RongRTCAdapter, { Mode, LiveType, ROLE } from '@rongcloud/rtc-v3-adapter'
+import { installer, RCRTCClient } from '@rongcloud/plugin-rtc'
+import * as RongRTCAdapter from '@rongcloud/rtc-v3-adapter'
 
 // IM 客户端初始化，此处以 IMLib 2.8 举例
 const imClient = RongIMLib.init(appkey, null, { ...options })
@@ -34,7 +44,7 @@ const rtcClient: RCRTCClient = imClient.install(installer, { ...options })
 RongRTCAdapter.init({ client: rtcClient, bitrate, liveRole?, mode?, liveType? })
 
 // 由于初始化方式变更，故模块获取方式也需要变更，现在直接通过 RongRTCAdapter 顶级变量获取
-const { Room, Stream, Message, Device, Storage, StreamType, StreamSize } = RongRTCAdapter;
+const { Room, Stream, Message, Device, Storage, StreamType, StreamSize，Mode, LiveType, ROLE } = RongRTCAdapter;
 
 // 观众上麦，替换 rongRTC.changeLiveRole 接口，接口不接收参数
 RongRTCAdapter.becameAuchor()
@@ -90,7 +100,7 @@ new Monitor({
 });
 ```
 
-## TODO
+### TODO
 
 ##### RongRTCAdapter（index.ts）
 
@@ -143,21 +153,21 @@ new Monitor({
 
 RTCLib v3 版本中，设置推流地址需要调用 `setMixConfig` 才可生效，桥阶层保持该逻辑不变
 
-#### Device
+##### Device
 
 * ⭕️ constructor()
 * ⭕️ get()
 
-#### Monitor
+##### Monitor
 
 * ⭕️ constructor()
 
-#### Message
+##### Message
 
 * ⭕️ constructor()
 * ⭕️ send()
 
-#### Storage
+##### Storage
 
 * ⭕️ constructor()
 * ⭕️ set()
