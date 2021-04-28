@@ -7,11 +7,18 @@
 * Message
 * Device
 * Storage
+* Monitor
 * StreamType
 * StreamSize
 * Mode
 * ROLE
 * LiveType
+* LayoutMode
+* RenderMode
+* Resolution
+* RongRTCVideoFps
+* StorageType
+---
 * init()
 * destroy()
 * becameAuchor()
