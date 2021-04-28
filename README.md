@@ -8,7 +8,7 @@
 * 使用 RongIMLib v3 及 v4 的开发者需升级至 RongIMLib v4.3 以上 - `npm i @rongcloud/imlib-v4@latest`
 * 需安装 RTCLib v5 版本 - `npm i @rongcloud/plugin-rtc@latest`
 
-## 安装桥接模块
+## 安装
 
 ```shell
 npm i @rongcloud/adapter-plugin-rtc
@@ -18,7 +18,7 @@ npm i @rongcloud/adapter-plugin-rtc
 
 以下列出的是相较于老版本 RongRTC-v3，使用桥阶模块所需要进行的修改内容
 
-##### init
+##### 初始化
 
 ```typescript
 import RongIMLib from '@rongcloud/imlib-v2'
@@ -53,7 +53,7 @@ const room = new Room({ id, ...options })
 room.join(/*{ id: 'userId' }*/).then(() => {}, error => {})
 ```
 
-##### Stream
+##### Stream 模块
 
 ```typescript
 // Stream 模块初始化方式不变
