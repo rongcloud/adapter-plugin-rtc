@@ -13,12 +13,12 @@
 * ✅ RongRTCVideoFps
 * ✅ StorageType
 ---
-* ⭕️ Room
-* ⭕️ Stream
-* ⭕️ Message
-* ⭕️ Device
-* ⭕️ Storage
-* ⭕️ Monitor
+* ✅ Room
+* ✅ Stream
+* ✅ Message
+* ✅ Device
+* ✅ Storage
+* ✅ Monitor
 ---
 * ⭕️ init()
 * ⭕️ destroy()
