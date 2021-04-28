@@ -25,7 +25,7 @@ npm i @rongcloud/adapter-plugin-rtc
 
 ### CHANGE
 
-以下列出的是相较于老版本 RongRTC-v3，使用桥阶层所需要进行的修改内容
+以下列出的是相较于老版本 RongRTC-v3，使用 RongRTCAdapter 所需要进行的修改内容
 
 ##### Init
 
@@ -150,8 +150,6 @@ new Monitor({
 * ⭕️ addPublishStreamUrl()
 * ⭕️ removePublishStreamUrl()
 * ⭕️ setMixConfig()
-
-RTCLib v3 版本中，设置推流地址需要调用 `setMixConfig` 才可生效，桥阶层保持该逻辑不变
 
 ##### Device
 
