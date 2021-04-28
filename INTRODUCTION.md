@@ -58,9 +58,25 @@ room.join(/*{ id: 'userId' }*/).then(() => {}, error => {})
 ```typescript
 // Stream 模块初始化方式不变
 const stream = new Stream({ ...options })
-// 发布及取消发布资源时不再需要传递当前用户 id
+
+// 发布资源时不再需要传递当前用户 id
 stream.publish({ /*id: '',*/ stream: { tag, type, mediaStream }}).then(() => {}, error => {})
+
+// 发布小流时，需先保证发布了大流数据
+stream.publish({ stream: { tag, type, mediaStream, size } })
+
+// 取消发布资源时不再需要传递当前用户 id
 stream.unpublish({ /*id: '',*/ stream: { tag, type } }).then(() => {}, error => {})
+
+// 切换大小流 不再需要传递 stream.type 字段
+stream.resize({
+  id: '',
+  stream: {
+    tag: '',
+    size: StreamSize.MAX,
+    // type: StreamType.AUDIO_AND_VIDEO
+  }
+})
 ```
 
 ##### Monitor 模块

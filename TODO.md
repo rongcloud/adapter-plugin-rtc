@@ -44,6 +44,12 @@
 * ⭕️ audio.mute()
 * ⭕️ audio.ummute()
 * ⭕️ resize()
+---
+* ⭕️ addPublishStreamUrl()
+* ⭕️ removePublishStreamUrl()
+* ⭕️ setMixConfig()
+
+RTCLib v3 版本中，设置推流地址需要调用 `setMixConfig` 才可生效，桥阶层保持该逻辑不变
 
 #### Device
 

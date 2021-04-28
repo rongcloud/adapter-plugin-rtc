@@ -4,22 +4,17 @@ import logger from './logger'
 import { Device } from './modules/Device'
 import { Message } from './modules/Message'
 import { Monitor } from './modules/Monitor'
-import { Room } from './modules/Room'
-import { Stream } from './modules/Stream'
 import { Storage } from './modules/Storage'
 import { RTCClientCtrl } from './RTCClientCtrl'
 
 export * from './enums'
 
-// 导出模块
-export {
-  Room,
-  Stream,
-  Device,
-  Message,
-  Monitor,
-  Storage
-}
+export * from './modules/Room'
+export * from './modules/Stream'
+export * from './modules/Device'
+export * from './modules/Message'
+export * from './modules/Monitor'
+export * from './modules/Storage'
 
 export {
   IRTCAdapterOptions
@@ -32,7 +27,7 @@ export function init (options: IRTCAdapterOptions) {
   }
 
   if (RTCClientCtrl.getInstance()) {
-    logger.error(`${__NAME__} initialized!`)
+    logger.error(`${__NAME__} repeat initialize!`)
     return
   }
 
@@ -50,7 +45,7 @@ export function becameAuchor () {
 
 export function destroy () {
   if (!RTCClientCtrl.getInstance()) {
-    logger.warn(`${__NAME__} has been destroyed.`)
+    logger.warn(`${__NAME__} not initialized yet.`)
     return
   }
   RTCClientCtrl.destroy()

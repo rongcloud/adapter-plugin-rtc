@@ -1,6 +1,6 @@
 import { EventEmitter } from '@rongcloud/engine'
-import { RCLivingType, RCRTCClient } from '@rongcloud/plugin-rtc'
-import { Mode } from './enums'
+import { RCLivingType, RCRTCClient, RCRTCCode, RCRTCRoom } from '@rongcloud/plugin-rtc'
+import { Mode, ROLE } from './enums'
 import { IRTCAdapterOptions } from './interfaces/IRTCAdapterOptions'
 
 export class RTCClientCtrl extends EventEmitter {
@@ -12,10 +12,8 @@ export class RTCClientCtrl extends EventEmitter {
   }
 
   static destroy () {
-    if (this._instance) {
-      this._instance.destroy()
-      this._instance = null
-    }
+    this._instance!.destroy()
+    this._instance = null
   }
 
   static getInstance () {
@@ -23,6 +21,7 @@ export class RTCClientCtrl extends EventEmitter {
   }
 
   private readonly _client: RCRTCClient
+  private _room?: RCRTCRoom | RCLivingType
 
   constructor (private _options: IRTCAdapterOptions) {
     super()
@@ -30,11 +29,29 @@ export class RTCClientCtrl extends EventEmitter {
     this._client = _options.client
   }
 
-  join (roomId: string) {
+  getRTCClient () {
+    return this._client
+  }
+
+  getCrtRoom () {
+    return this._room
+  }
+
+  async join (roomId: string) {
+    let data
     if (this._options.mode === Mode.LIVE) {
-      return this._client.joinLivingRoom(roomId, (this._options.liveType || 0) as RCLivingType)
+      if (this._options.liveRole !== ROLE.ANCHOR) {
+        return { code: RCRTCCode.PARAMS_ERROR }
+      }
+      data = await this._client.joinLivingRoom(roomId, (this._options.liveType || 0) as RCLivingType)
+    } else {
+      data = await this._client.joinRTCRoom(roomId)
     }
-    return this._client.joinRTCRoom(roomId)
+    const { code, room } = data
+    if (code === RCRTCCode.SUCCESS) {
+      this._room = room
+    }
+    return { code }
   }
 
   private destroy () {

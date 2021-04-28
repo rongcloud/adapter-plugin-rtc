@@ -1,3 +1,7 @@
+import logger from '../logger'
+
 export class Device {
-  get () {}
+  get () {
+    logger.error('todo ->')
+  }
 }
