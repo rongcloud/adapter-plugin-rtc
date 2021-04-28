@@ -49,8 +49,9 @@ RongRTCAdapter.destroy()
 ```typescript
 //Room 模块初始化方式不变
 const room = new Room({ id, ...options })
+
 // 加入房间时不再需要传参
-room.join(/*{ id: 'userId' }*/).then(() => {}, error => {})
+room.join(/*{ id: 'userId' }*/)
 ```
 
 ##### Stream
@@ -60,13 +61,13 @@ room.join(/*{ id: 'userId' }*/).then(() => {}, error => {})
 const stream = new Stream({ ...options })
 
 // 发布资源时不再需要传递当前用户 id
-stream.publish({ /*id: '',*/ stream: { tag, type, mediaStream }}).then(() => {}, error => {})
+stream.publish({ /*id: '',*/ stream: { tag, type, mediaStream }})
 
 // 发布小流时，需先保证发布了大流数据
-stream.publish({ stream: { tag, type, mediaStream, size } })
+stream.publish({ stream: { tag, type, mediaStream, size }})
 
 // 取消发布资源时不再需要传递当前用户 id
-stream.unpublish({ /*id: '',*/ stream: { tag, type } }).then(() => {}, error => {})
+stream.unpublish({ /*id: '',*/ stream: { tag, type }})
 
 // 切换大小流 不再需要传递 stream.type 字段
 stream.resize({
@@ -88,3 +89,77 @@ new Monitor({
   }
 });
 ```
+
+## TODO
+
+##### RongRTCAdapter（index.ts）
+
+* ✅ StreamType
+* ✅ StreamSize
+* ✅ Mode
+* ✅ ROLE
+* ✅ LiveType
+* ✅ LayoutMode
+* ✅ RenderMode
+* ✅ Resolution
+* ✅ RongRTCVideoFps
+* ✅ StorageType
+---
+* ✅ Room
+* ✅ Stream
+* ✅ Message
+* ✅ Device
+* ✅ Storage
+* ✅ Monitor
+---
+* ⭕️ init()
+* ⭕️ destroy()
+* ⭕️ becameAuchor()
+
+##### Room
+
+* ⭕️ constructor()
+* ⭕️ join()
+* ⭕️ leave()
+* ⭕️ get()
+
+##### Stream
+
+* ⭕️ constructor()
+* ⭕️ get()
+* ⭕️ publish()
+* ⭕️ unpublish()
+* ⭕️ subscribe()
+* ⭕️ unsubscribe()
+* ⭕️ video.disable()
+* ⭕️ video.enable()
+* ⭕️ audio.mute()
+* ⭕️ audio.ummute()
+* ⭕️ resize()
+---
+* ⭕️ addPublishStreamUrl()
+* ⭕️ removePublishStreamUrl()
+* ⭕️ setMixConfig()
+
+RTCLib v3 版本中，设置推流地址需要调用 `setMixConfig` 才可生效，桥阶层保持该逻辑不变
+
+#### Device
+
+* ⭕️ constructor()
+* ⭕️ get()
+
+#### Monitor
+
+* ⭕️ constructor()
+
+#### Message
+
+* ⭕️ constructor()
+* ⭕️ send()
+
+#### Storage
+
+* ⭕️ constructor()
+* ⭕️ set()
+* ⭕️ get()
+* ⭕️ remove()

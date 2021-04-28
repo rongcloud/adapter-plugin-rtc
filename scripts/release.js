@@ -36,8 +36,6 @@ module.exports = (buildScripts) => {
     delete pkg['lint-staged']
     pkg.__commit__ = commitId
 
-    // 覆盖 README.md
-    runshell(`cp -r INTRODUCTION.md ${npmRelease}/README.md`)
     runshell(`echo '${JSON.stringify(pkg, null, '  ')}' > ${npmRelease}/package.json`)
   })();
 
