@@ -8,7 +8,7 @@
 * 使用 RongIMLib v3 及 v4 的开发者需升级至 RongIMLib v4.3 以上 - `npm i @rongcloud/imlib-v4@latest`
 * 需安装 RTCLib v5 版本 - `npm i @rongcloud/plugin-rtc@latest`
 
-## 安装
+## 安装桥接模块
 
 ```shell
 npm i @rongcloud/adapter-plugin-rtc
@@ -18,7 +18,7 @@ npm i @rongcloud/adapter-plugin-rtc
 
 以下列出的是相较于老版本 RongRTC-v3，使用桥阶模块所需要进行的修改内容
 
-##### 初始化
+##### init
 
 ```typescript
 import RongIMLib from '@rongcloud/imlib-v2'
@@ -53,14 +53,30 @@ const room = new Room({ id, ...options })
 room.join(/*{ id: 'userId' }*/).then(() => {}, error => {})
 ```
 
-##### Stream 模块
+##### Stream
 
 ```typescript
 // Stream 模块初始化方式不变
 const stream = new Stream({ ...options })
-// 发布及取消发布资源时不再需要传递当前用户 id
+
+// 发布资源时不再需要传递当前用户 id
 stream.publish({ /*id: '',*/ stream: { tag, type, mediaStream }}).then(() => {}, error => {})
+
+// 发布小流时，需先保证发布了大流数据
+stream.publish({ stream: { tag, type, mediaStream, size } })
+
+// 取消发布资源时不再需要传递当前用户 id
 stream.unpublish({ /*id: '',*/ stream: { tag, type } }).then(() => {}, error => {})
+
+// 切换大小流 不再需要传递 stream.type 字段
+stream.resize({
+  id: '',
+  stream: {
+    tag: '',
+    size: StreamSize.MAX,
+    // type: StreamType.AUDIO_AND_VIDEO
+  }
+})
 ```
 
 ##### Monitor 模块
