@@ -1,6 +1,7 @@
 import { EventEmitter } from '@rongcloud/engine'
 import { RCLivingRoom, RCLivingType, RCRTCClient, RCRTCCode, RCRTCRoom } from '@rongcloud/plugin-rtc'
-import { Mode, ROLE } from './enums'
+import { ErrorCode, Mode, ROLE } from './enums'
+import { IJoineResult } from './interfaces/IJoinedData'
 import { IRTCAdapterOptions } from './interfaces/IRTCAdapterOptions'
 import logger from './logger'
 
@@ -38,25 +39,26 @@ export class RTCClientCtrl extends EventEmitter {
     return this._room
   }
 
-  async join (roomId: string) {
+  async join (roomId: string): Promise<IJoineResult> {
     let data
     if (this._options.mode === Mode.LIVE) {
       if (this._options.liveRole !== ROLE.ANCHOR) {
-        return { code: RCRTCCode.PARAMS_ERROR }
+        return Promise.reject({ code: ErrorCode.ANDIENCE_CANNOT_JOIN_ROOM })
       }
       data = await this._client.joinLivingRoom(roomId, (this._options.liveType || 0) as RCLivingType)
     } else {
       data = await this._client.joinRTCRoom(roomId)
     }
-    const { code, room } = data
+    const { code } = data
     if (code !== RCRTCCode.SUCCESS) {
-      return { code }
+      return Promise.reject({ code })
     }
 
-    this._setCrtRoom(room!)
+    const room = data.room!
+    this._setCrtRoom(room)
     // 找出所有人员、资源，逐个通知业务层
-    room!.getRemoteUserIds()
-    return { code }
+    const users = room.getRemoteUserIds().map(id => ({ id }))
+    return { users }
   }
 
   async leaveRoom () {

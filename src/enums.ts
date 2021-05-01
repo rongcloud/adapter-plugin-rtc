@@ -51,3 +51,10 @@ export enum StreamSize {
 export enum StreamType {
   NODE = -1, AUDIO = 0, VIDEO = 1, AUDIO_AND_VIDEO = 2
 }
+
+/**
+ * 从 53900 后开始，避免与 RCRTCCode 冲突
+ */
+export enum ErrorCode {
+  ANDIENCE_CANNOT_JOIN_ROOM = 53901
+}

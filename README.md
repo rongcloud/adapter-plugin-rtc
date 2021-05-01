@@ -164,6 +164,7 @@ new Monitor({
 ##### Report
 
 * ⭕️ constructor()
+* ⭕️ start()
 
 ##### Message
 

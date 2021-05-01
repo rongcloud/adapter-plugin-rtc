@@ -1,4 +1,5 @@
 import { RCRTCCode } from '@rongcloud/plugin-rtc'
+import { IJoineResult } from '../interfaces/IJoinedData'
 import logger from '../logger'
 import { BasicModule } from './Basic'
 
@@ -18,13 +19,8 @@ export class Room extends BasicModule {
     this._options = { ...options }
   }
 
-  async join () {
-    logger.error('todo -> join')
-    const { code } = await this._ctrl.join(this._options.id)
-    if (code !== RCRTCCode.SUCCESS) {
-      return Promise.reject(code)
-    }
-    return Promise.resolve()
+  async join (): Promise<IJoineResult> {
+    return this._ctrl.join(this._options.id)
   }
 
   leave () {

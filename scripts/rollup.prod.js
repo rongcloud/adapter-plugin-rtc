@@ -25,8 +25,11 @@ const banner = [
 ].join('\n')
 
 const { name: engineName, __attrs__: engineAttrs } = require('../node_modules/@rongcloud/engine/package.json')
+const { name: rtcName, __attrs__: rtcAttrs } = require('../node_modules/@rongcloud/plugin-rtc/package.json')
+
 const globals = {
-  [engineName]: engineAttrs.globals
+  [engineName]: engineAttrs.globals,
+  [rtcName]: rtcAttrs.globals
 }
 
 const consts = {
