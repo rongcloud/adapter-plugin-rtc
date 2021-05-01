@@ -121,6 +121,7 @@ new Monitor({
 * ✅ Device
 * ✅ Storage
 * ✅ Monitor
+* ✅ Report
 ---
 * ⭕️ init()
 * ⭕️ destroy()
@@ -157,6 +158,10 @@ new Monitor({
 * ⭕️ get()
 
 ##### Monitor
+
+* ⭕️ constructor()
+
+##### Report
 
 * ⭕️ constructor()
 

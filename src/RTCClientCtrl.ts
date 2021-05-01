@@ -1,7 +1,8 @@
 import { EventEmitter } from '@rongcloud/engine'
-import { RCLivingType, RCRTCClient, RCRTCCode, RCRTCRoom } from '@rongcloud/plugin-rtc'
+import { RCLivingRoom, RCLivingType, RCRTCClient, RCRTCCode, RCRTCRoom } from '@rongcloud/plugin-rtc'
 import { Mode, ROLE } from './enums'
 import { IRTCAdapterOptions } from './interfaces/IRTCAdapterOptions'
+import logger from './logger'
 
 export class RTCClientCtrl extends EventEmitter {
   private static _instance: RTCClientCtrl | null = null
@@ -21,7 +22,7 @@ export class RTCClientCtrl extends EventEmitter {
   }
 
   private readonly _client: RCRTCClient
-  private _room?: RCRTCRoom | RCLivingType
+  private _room?: RCRTCRoom | RCLivingRoom
 
   constructor (private _options: IRTCAdapterOptions) {
     super()
@@ -48,10 +49,46 @@ export class RTCClientCtrl extends EventEmitter {
       data = await this._client.joinRTCRoom(roomId)
     }
     const { code, room } = data
-    if (code === RCRTCCode.SUCCESS) {
-      this._room = room
+    if (code !== RCRTCCode.SUCCESS) {
+      return { code }
     }
+
+    this._setCrtRoom(room!)
+    // 找出所有人员、资源，逐个通知业务层
+    room!.getRemoteUserIds()
     return { code }
+  }
+
+  async leaveRoom () {
+    const { code } = await this._client.leaveRoom(this._room!)
+    if (code === RCRTCCode.SUCCESS) {
+      return Promise.resolve()
+    } else {
+      return Promise.reject({ code })
+    }
+  }
+
+  becameAuchor () {
+    logger.error('todo -> becameAuchor')
+  }
+
+  private _setCrtRoom (room: RCRTCRoom) {
+    room.registerReportListener({
+      onStateReport (report) {
+      }
+    })
+    room.registerRoomEventListener({
+      onUserJoin (userIds) {},
+      onUserLeave (userIds) {},
+      onKickOff (byServer) {},
+      onMessageReceive (name, content) {},
+      onTrackPublish (track) {},
+      onTrackUnpublish (track) {},
+      onTrackReady (track) {},
+      onAudioMuteChange (track) {},
+      onVideoMuteChange (track) {},
+      onRoomAttributeChange (name, content) {}
+    })
   }
 
   private destroy () {

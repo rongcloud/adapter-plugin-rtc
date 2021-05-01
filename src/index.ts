@@ -1,19 +1,16 @@
 import { LogLevel } from '@rongcloud/engine'
+import { RCRTCCode } from '@rongcloud/plugin-rtc'
 import { IRTCAdapterOptions } from './interfaces/IRTCAdapterOptions'
 import logger from './logger'
-import { Device } from './modules/Device'
-import { Message } from './modules/Message'
-import { Monitor } from './modules/Monitor'
-import { Storage } from './modules/Storage'
 import { RTCClientCtrl } from './RTCClientCtrl'
 
 export * from './enums'
-
 export * from './modules/Room'
 export * from './modules/Stream'
 export * from './modules/Device'
 export * from './modules/Message'
 export * from './modules/Monitor'
+export * from './modules/Report'
 export * from './modules/Storage'
 
 export {
@@ -40,7 +37,13 @@ export function init (options: IRTCAdapterOptions) {
 }
 
 export function becameAuchor () {
-  throw new Error('TODO -> becameAuchor')
+  const ins = RTCClientCtrl.getInstance()
+  if (!ins) {
+    const msg = `${__NAME__} not initialized yet.`
+    logger.error(msg)
+    return Promise.reject(msg)
+  }
+  return ins.becameAuchor()
 }
 
 export function destroy () {

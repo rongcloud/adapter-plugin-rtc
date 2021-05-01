@@ -27,8 +27,8 @@ export class Room extends BasicModule {
     return Promise.resolve()
   }
 
-  async leave () {
-    logger.error('todo -> leave')
+  leave () {
+    return this._ctrl.leaveRoom()
   }
 
   async get (): Promise<RoomInfo | any> {

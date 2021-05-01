@@ -12,7 +12,6 @@ export class BasicModule {
       logger.error(`${__NAME__} not initialize yet`)
       return
     }
-    this._client = ctrl.getRTCClient()
     this._ctrl = ctrl
     this._ctrl.on(RTCClientCtrl.__INNER_EVENT_DESTROY__, this.onDestroy, this)
   }
