@@ -31,8 +31,6 @@ const globals = {
   [rtcName]: rtcAttrs.globals
 }
 
-console.log(globals)
-
 const consts = {
   __COMMIT_ID__: JSON.stringify(commitId),
   __VERSION__: JSON.stringify(pkg.version),
