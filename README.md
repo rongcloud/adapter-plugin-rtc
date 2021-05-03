@@ -163,8 +163,8 @@ new Monitor({
 
 ##### Report
 
-* ⭕️ constructor()
-* ⭕️ start()
+* ✅ constructor()
+* ✅ ~~start()~~
 
 ##### Message
 

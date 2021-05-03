@@ -1,3 +1,4 @@
+import { IRCRTCStateReport } from '@rongcloud/plugin-rtc'
 import { BasicModule } from './Basic'
 
 export type ITrackStat = {
@@ -45,7 +46,11 @@ export type IMonitor = {
 }
 
 export interface IMonitorInitOptions {
-  stats (data: IMonitor): void
+  stats? (data: IMonitor): void
+}
+
+const parseRTCStateReport = (resport: IRCRTCStateReport): IMonitor => {
+  throw new Error('todo -> parseRTCStateReport')
 }
 
 export class Monitor extends BasicModule {
@@ -53,5 +58,9 @@ export class Monitor extends BasicModule {
   constructor (options: IMonitorInitOptions) {
     super()
     this._options = { ...options }
+    const onStateReport = (report: IRCRTCStateReport) => {
+      this._options.stats?.(parseRTCStateReport(report))
+    }
+    this._ctrl.registerReportListener({ onStateReport })
   }
 }
