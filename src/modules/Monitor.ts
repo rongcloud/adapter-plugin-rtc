@@ -1,12 +1,21 @@
-import { IRCRTCStateReport } from '@rongcloud/plugin-rtc'
+import { IRCCandidatePairStat, IRCRTCStateReport, IRCTrackStat } from '@rongcloud/plugin-rtc'
 import { BasicModule } from './Basic'
 
 export type ITrackStat = {
   mediaType: string
   googTrackId: string
+  /**
+   * @deprecated
+   */
   googCodecName: string
   audioLevel: string
+  /**
+   * @deprecated
+   */
   samplingRate: string
+  /**
+   * @deprecated
+   */
   trackReceived: string
   packLostReceivedRate: string
   frameRate: string
@@ -16,6 +25,9 @@ export type ITrackStat = {
   googNacksReceived: string
   googPlisReceived: string
   googRtt: string
+  /**
+   * @deprecated
+   */
   googFirsReceived: string
   codecImplementationName: string
   trackState: string
@@ -30,6 +42,9 @@ export type ISenderData = {
   receiveBand: number
   localAddress: string
   sendBand: number
+  /**
+   * @deprecated 丢包率需按流计算，不存在总丢包率
+   */
   packetsLost: number
   deviceId: string
 }
@@ -49,8 +64,51 @@ export interface IMonitorInitOptions {
   stats? (data: IMonitor): void
 }
 
+const trans2ITrackStat = (iceCandidatePair: IRCCandidatePairStat | undefined, item: IRCTrackStat): ITrackStat => {
+  return {
+    mediaType: item.kind,
+    googTrackId: item.trackId,
+    googCodecName: '',
+    audioLevel: item.audioLevel?.toString() || '',
+    samplingRate: '',
+    frameRate: item.frameRate?.toString() || '',
+    packLostReceivedRate: item.packetsLostRate.toString(),
+    trackReceived: '',
+    resolution: item.frameWidth && item.frameHeight ? [item.frameWidth, item.frameHeight].join('x') : '',
+    googFirsReceived: '',
+    googRenderDelayMs: '',
+    googJitterReceived: item.jitter.toString(),
+    googNacksReceived: '',
+    googPlisReceived: '',
+    googRtt: iceCandidatePair?.rtt.toString() || '',
+    codecImplementationName: '',
+    trackState: '',
+    streamId: item.trackId.replace(/_[01](_tiny)?$/, '')
+  }
+}
+
 const parseRTCStateReport = (resport: IRCRTCStateReport): IMonitor => {
-  throw new Error('todo -> parseRTCStateReport')
+  const { receivers, senders, iceCandidatePair, timestamp } = resport
+  const trans = (item: IRCTrackStat): ITrackStat => {
+    return trans2ITrackStat(iceCandidatePair, item)
+  }
+  const sender: ISenderData = {
+    deviceId: '',
+    sendBand: iceCandidatePair?.availableOutgoingBitrate || 0,
+    receiveBand: iceCandidatePair?.availableIncomingBitrate || 0,
+    totalRate: iceCandidatePair?.bitrateSend || 0,
+    tracks: senders.map(trans),
+    networkType: iceCandidatePair?.networkType || 'unknown',
+    rtt: iceCandidatePair?.rtt || 0,
+    localAddress: iceCandidatePair?.IP || '',
+    packetsLost: NaN
+  }
+  const received: IReceiverData = {
+    totalRate: iceCandidatePair?.bitrateRecv || 0,
+    rtt: iceCandidatePair?.rtt || 0,
+    tracks: receivers.map(trans)
+  }
+  return { sender, received }
 }
 
 export class Monitor extends BasicModule {
