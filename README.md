@@ -150,7 +150,7 @@ new Monitor({
 ---
 * ✅ addPublishStreamUrl()
 * ✅ removePublishStreamUrl()
-* ⭕️ setMixConfig()
+* ✅ setMixConfig()
 
 ##### Device
 
