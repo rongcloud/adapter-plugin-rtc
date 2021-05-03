@@ -130,9 +130,9 @@ new Monitor({
 ##### Room
 
 * ⭕️ constructor()
-* ⭕️ join()
-* ⭕️ leave()
-* ⭕️ get()
+* ✅ join()
+* ✅ leave()
+* ✅ get()
 
 ##### Stream
 

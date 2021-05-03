@@ -27,8 +27,15 @@ export class Room extends BasicModule {
     return this._ctrl.leaveRoom()
   }
 
-  async get (): Promise<RoomInfo | any> {
-    logger.error('todo -> Room.get')
-    throw new Error('todo -> Room.get')
+  async get (): Promise<RoomInfo> {
+    return this._ctrl.checkRoomThen(async (room) => {
+      const id = this._options.id
+      const total = room.getRemoteUserIds().length + 1
+      const { code, data } = await room.getRoomAttributes([])
+      if (code === RCRTCCode.SUCCESS) {
+        return { ...data, id, total }
+      }
+      return { id, total }
+    })
   }
 }
