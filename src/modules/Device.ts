@@ -2,6 +2,6 @@ import logger from '../logger'
 
 export class Device {
   get () {
-    logger.error('todo -> Device.get')
+    return navigator.mediaDevices.enumerateDevices()
   }
 }

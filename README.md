@@ -137,7 +137,7 @@ new Monitor({
 ##### Stream
 
 * ⭕️ constructor()
-* ⭕️ get()
+* ✅ get()
 * ⭕️ publish()
 * ⭕️ unpublish()
 * ⭕️ subscribe()
