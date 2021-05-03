@@ -168,7 +168,7 @@ new Monitor({
 
 ##### Message
 
-* ⭕️ constructor()
+* ✅ constructor()
 * ✅ send()
 
 ##### Storage

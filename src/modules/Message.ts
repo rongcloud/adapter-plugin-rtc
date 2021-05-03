@@ -1,5 +1,4 @@
 import { RCRTCCode } from '@rongcloud/plugin-rtc'
-import logger from '../logger'
 import { BasicModule } from './Basic'
 
 export interface IMessageInfo {
@@ -10,17 +9,16 @@ export interface IMessageInfo {
 }
 
 export class Message extends BasicModule {
-  constructor (private _options: { received: (msg: IMessageInfo) => void }) {
+  constructor (options: { received: (msg: IMessageInfo) => void }) {
     super()
-    this._ctrl.on('message', this._onMessage, this)
-  }
-
-  private _onMessage (message: IMessageInfo) {
-    this._options.received(message)
+    this._ctrl.registerRoomEventListener({
+      onMessageReceive (name, content, senderId, messageUId) {
+        options.received({ name, content, senderId, uId: messageUId })
+      }
+    })
   }
 
   send (msg: { name: string, content: unknown }) {
-    logger.debug(`Message.send -> ${JSON.stringify(msg)}`)
     return this._ctrl.checkRoomThen(async (room) => {
       const { code } = await room.sendMessage(msg.name, msg.content)
       if (code === RCRTCCode.SUCCESS) {
