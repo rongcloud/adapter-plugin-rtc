@@ -169,11 +169,11 @@ new Monitor({
 ##### Message
 
 * ⭕️ constructor()
-* ⭕️ send()
+* ✅ send()
 
 ##### Storage
 
-* ⭕️ constructor()
-* ⭕️ set()
-* ⭕️ get()
-* ⭕️ remove()
+* ✅ constructor()
+* ✅ set()
+* ✅ get()
+* ✅ remove()

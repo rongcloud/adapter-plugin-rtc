@@ -1,3 +1,4 @@
+import { RCRTCCode } from '@rongcloud/plugin-rtc'
 import logger from '../logger'
 import { BasicModule } from './Basic'
 
@@ -19,6 +20,13 @@ export class Message extends BasicModule {
   }
 
   send (msg: { name: string, content: unknown }) {
-    logger.error('todo -> Message.send')
+    logger.debug(`Message.send -> ${JSON.stringify(msg)}`)
+    return this._ctrl.checkRoomThen(async (room) => {
+      const { code } = await room.sendMessage(msg.name, msg.content)
+      if (code === RCRTCCode.SUCCESS) {
+        return Promise.resolve()
+      }
+      return Promise.reject({ code })
+    })
   }
 }
