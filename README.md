@@ -148,8 +148,8 @@ new Monitor({
 * ✅ audio.ummute()
 * ✅ resize()
 ---
-* ⭕️ addPublishStreamUrl()
-* ⭕️ removePublishStreamUrl()
+* ✅ addPublishStreamUrl()
+* ✅ removePublishStreamUrl()
 * ⭕️ setMixConfig()
 
 ##### Device
