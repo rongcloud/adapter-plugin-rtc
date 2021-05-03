@@ -1,5 +1,5 @@
 import { EventEmitter } from '@rongcloud/engine'
-import { RCLivingRoom, RCAbstractRoom, RCLivingType, RCRTCClient, RCRTCCode, RCRTCRoom } from '@rongcloud/plugin-rtc'
+import { IRCRTCReportListener, IRoomEventListener, RCLivingRoom, RCAbstractRoom, RCLivingType, RCRTCClient, RCRTCCode, RCRTCRoom, IRCRTCStateReport } from '@rongcloud/plugin-rtc'
 import { RCAdapterCode, Mode, ROLE } from './enums'
 import { IJoineResult } from './interfaces/IJoinedData'
 import { IRTCAdapterOptions } from './interfaces/IRTCAdapterOptions'
@@ -33,6 +33,18 @@ export class RTCClientCtrl extends EventEmitter {
 
   getRTCClient () {
     return this._client
+  }
+
+  getRTCMode () {
+    return this._options.mode || Mode.RTC
+  }
+
+  getLiveRole () {
+    return this._options.liveRole
+  }
+
+  getLiveType () {
+    return this._options.liveType
   }
 
   /**
@@ -79,30 +91,63 @@ export class RTCClientCtrl extends EventEmitter {
   }
 
   becameAuchor () {
-    logger.error('todo -> becameAuchor')
+    logger.error('todo -> RCClientCtrl.becameAuchor')
+  }
+
+  public registerRoomEventListener (listener: IRoomEventListener) {
+    const tmp: any = listener
+    Object.keys(listener).forEach(key => tmp[key] && this.on(key, tmp[key]))
+  }
+
+  public registerReportListener (listener: IRCRTCReportListener) {
+    const tmp: any = listener
+    Object.keys(listener).forEach(key => tmp[key] && this.on(key, tmp[key]))
   }
 
   private _setCrtRoom (room: RCRTCRoom) {
+    const _this = this
     this._room = room
     room.registerReportListener({
       onStateReport (report) {
+        _this.emit('onStateReport', report)
       }
     })
     room.registerRoomEventListener({
-      onUserJoin (userIds) {},
-      onUserLeave (userIds) {},
-      onKickOff (byServer) {},
-      onMessageReceive (name, content) {},
-      onTrackPublish (track) {},
-      onTrackUnpublish (track) {},
-      onTrackReady (track) {},
-      onAudioMuteChange (track) {},
-      onVideoMuteChange (track) {},
-      onRoomAttributeChange (name, content) {}
+      onUserJoin (userIds) {
+        _this.emit('onUserJoin', userIds)
+      },
+      onUserLeave (userIds) {
+        _this.emit('onUserLeave', userIds)
+      },
+      onKickOff (byServer) {
+        _this.emit('onKickOff', byServer)
+      },
+      onMessageReceive (name, content) {
+        _this.emit('onMessageReceive', name, content)
+      },
+      onTrackPublish (track) {
+        _this.emit('onTrackPublish', track)
+      },
+      onTrackUnpublish (track) {
+        _this.emit('onTrackUnpublish', track)
+      },
+      onTrackReady (track) {
+        _this.emit('onTrackReady', track)
+      },
+      onAudioMuteChange (track) {
+        _this.emit('onAudioMuteChange', track)
+      },
+      onVideoMuteChange (track) {
+        _this.emit('onVideoMuteChange', track)
+      },
+      onRoomAttributeChange (name, content) {
+        _this.emit('onRoomAttributeChange', name, content)
+      }
     })
   }
 
   private destroy () {
     this.emit(RTCClientCtrl.__INNER_EVENT_DESTROY__)
+    this.clear()
   }
 }

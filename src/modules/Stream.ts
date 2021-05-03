@@ -1,9 +1,13 @@
 import { RCRTCCode } from '@rongcloud/plugin-rtc'
-import { StreamSize, StreamType, Resolution } from '../enums'
+import { StreamSize, StreamType, Resolution, Mode, ROLE } from '../enums'
 import logger from '../logger'
 import { BasicModule } from './Basic'
 
-export interface IResInfo { tag: string, type: StreamType }
+export interface IResInfo {
+  tag: string,
+  type: StreamType
+}
+
 export interface IStreamInfo extends IResInfo {
   mediaStream: MediaStream,
 }
@@ -15,12 +19,12 @@ export interface IPublishOptions extends IStreamInfo {
 export type IUserRes<T> = { id: string, stream: T }
 
 export interface IStreamInitOptions {
-  published (user: IUserRes<IPublishOptions>): void
+  published (user: IUserRes<IResInfo>): void
   unpublished (user: IUserRes<IResInfo>): void
-  disabled (): void
-  enabled (): void
-  muted (): void
-  unmuted (): void
+  disabled (user: IUserRes<IStreamInfo>): void
+  enabled (user: IUserRes<IStreamInfo>): void
+  muted (user: IUserRes<IStreamInfo>): void
+  unmuted (user: IUserRes<IStreamInfo>): void
 }
 
 export interface IGetStreamOptions {
@@ -35,6 +39,8 @@ export interface IGetStreamOptions {
     resolution?: Resolution
   }
 }
+
+export interface ISubLiveOptions { liveUrl: string, type: StreamType, size: StreamSize }
 
 const RongRTCVideoBitRate = {
   RESOLUTION_176_132: { width: 176, height: 132, maxBitRate: 150, minBitRate: 80 },
@@ -87,6 +93,14 @@ export class Stream extends BasicModule {
   public readonly video: IVideoNode
   public readonly audio: IAudioNode
 
+  private readonly _promiseMaps: { [msid: string]: {
+    resolve: (data: IUserRes<IStreamInfo>) => void,
+    reject: (reason?: any) => void,
+    options: IUserRes<IResInfo>
+  }} = {}
+
+  private readonly _streamMaps: { [msid: string]: MediaStream } = {}
+
   constructor (options: IStreamInitOptions) {
     super()
     this._options = { ...options }
@@ -110,6 +124,66 @@ export class Stream extends BasicModule {
       mute: changeTrackState.bind(_this, StreamType.AUDIO, false),
       unmute: changeTrackState.bind(_this, StreamType.AUDIO, true)
     }
+
+    this._ctrl.registerRoomEventListener({
+      onTrackPublish (tracks) {
+        const published = _this._options.published
+        if (!published) {
+          return
+        }
+        // 两 track 合并为一条通知，与 v3 行为一致
+        const track = tracks[0]
+        const type: StreamType = tracks.length === 2
+          ? StreamType.AUDIO_AND_VIDEO
+          : track.isAudioTrack() ? StreamType.AUDIO : StreamType.VIDEO
+        const id = track.getUserId()
+        const tag = track.getTag()
+        published({ id, stream: { tag, type } })
+      },
+      onTrackUnpublish (tracks) {
+        const unpublished = _this._options.unpublished
+        if (!unpublished) {
+          return
+        }
+        // 两 track 合并为一条通知，与 v3 行为一致
+        const track = tracks[0]
+        const type: StreamType = tracks.length === 2
+          ? StreamType.AUDIO_AND_VIDEO
+          : track.isAudioTrack() ? StreamType.AUDIO : StreamType.VIDEO
+        const id = track.getUserId()
+        const tag = track.getTag()
+        unpublished({ id, stream: { tag, type } })
+      },
+      onTrackReady (track) {
+        const msid = track.getStreamId()
+        const mediaStream = _this._streamMaps[msid] = _this._streamMaps[msid] || new MediaStream()
+        mediaStream.addTrack(track.__innerGetMediaStreamTrack()!)
+        const data = _this._promiseMaps[msid]
+        if (data) {
+          const { options, resolve } = data
+          delete _this._promiseMaps[msid]
+          resolve({ id: options.id, stream: { ...options.stream, mediaStream } })
+        }
+      },
+      onAudioMuteChange (track) {
+        const enable = !track.isOwnerMuted()
+        const mediaStream = _this._streamMaps[track.getStreamId()]
+        const handle = enable ? _this._options.unmuted : _this._options.muted
+        if (!handle) {
+          return
+        }
+        handle({ id: track.getUserId(), stream: { tag: track.getTag(), type: StreamType.AUDIO, mediaStream } })
+      },
+      onVideoMuteChange (track) {
+        const enable = !track.isOwnerMuted()
+        const mediaStream = _this._streamMaps[track.getStreamId()]
+        const handle = enable ? _this._options.enabled : _this._options.disabled
+        if (!handle) {
+          return
+        }
+        handle({ id: track.getUserId(), stream: { tag: track.getTag(), type: StreamType.VIDEO, mediaStream } })
+      }
+    })
   }
 
   async get (options: IGetStreamOptions): Promise<{ mediaStream: MediaStream }> {
@@ -143,7 +217,7 @@ export class Stream extends BasicModule {
     return getUserMedia(constraints)
   }
 
-  async publish (options: { stream: IStreamInfo }): Promise<void> {
+  async publish (options: { stream: IStreamInfo }): Promise<{ liveUrl?: string }> {
     const { tag, type, mediaStream } = options.stream
     const withoutAudio = type === StreamType.VIDEO
     const withoutVideo = type === StreamType.AUDIO
@@ -158,6 +232,7 @@ export class Stream extends BasicModule {
       if (code !== RCRTCCode.SUCCESS) {
         return Promise.reject({ code })
       }
+      return { liveUrl }
     })
   }
 
@@ -175,21 +250,46 @@ export class Stream extends BasicModule {
     })
   }
 
-  subscribe (options: IUserRes<IResInfo>) {
-    const { id: userId, stream } = options
+  private _subLiveAsAudience (options: ISubLiveOptions): Promise<IUserRes<IStreamInfo>> {
+    logger.error('todo -> Stream._subLiveAsAudience')
+    throw new Error('todo -> Stream._subLiveAsAudience')
+  }
+
+  private _unsubLiveAsAudience (): Promise<void> {
+    logger.error('todo -> Stream._unsubLiveAsAudience')
+    throw new Error('todo -> Stream._unsubLiveAsAudience')
+  }
+
+  private _subscribe (options: IUserRes<IResInfo>): Promise<IUserRes<IStreamInfo>> {
+    const { id: userId, stream } = options as IUserRes<IResInfo>
     const { tag, type } = stream
     const trackIds = parseTrackIds(type, userId, tag)
 
     return this._ctrl.checkRoomThen(async room => {
       const tracks = trackIds.map(id => room.getRemoteTrack(id)).filter(item => !!item)
       const { code } = await room.subscribe(tracks)
+
       if (code !== RCRTCCode.SUCCESS) {
         return Promise.reject({ code })
       }
+
+      const msid = tracks[0].getStreamId()
+      return new Promise((resolve, reject) => {
+        this._promiseMaps[msid] = { resolve, reject, options: { id: userId, stream: { tag, type } } }
+      })
     })
   }
 
-  unsubscribe (options: IUserRes<IResInfo>) {
+  subscribe (options: IUserRes<IResInfo> | ISubLiveOptions): Promise<IUserRes<IStreamInfo>> {
+    const mode = this._ctrl.getRTCMode()
+    const role = this._ctrl.getLiveRole()
+    if (mode === Mode.LIVE && role === ROLE.AUDIENCE) {
+      return this._subLiveAsAudience(options as ISubLiveOptions)
+    }
+    return this._subscribe(options as IUserRes<IResInfo>)
+  }
+
+  private _unsubscribe (options: IUserRes<IResInfo>) {
     const { id: userId, stream } = options
     const { tag, type } = stream
     const trackIds = parseTrackIds(type, userId, tag)
@@ -201,6 +301,15 @@ export class Stream extends BasicModule {
         return Promise.reject({ code })
       }
     })
+  }
+
+  unsubscribe (options?: IUserRes<IResInfo>) {
+    const mode = this._ctrl.getRTCMode()
+    const role = this._ctrl.getLiveRole()
+    if (mode === Mode.LIVE && role === ROLE.AUDIENCE) {
+      return this._unsubLiveAsAudience()
+    }
+    return this._unsubscribe(options!)
   }
 
   resize (options: IUserRes<{ tag: string, size: StreamSize }>) {
