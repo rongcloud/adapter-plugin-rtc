@@ -1,6 +1,6 @@
 {
   "name": "@rongcloud/adapter-plugin-rtc",
-  "version": "0.0.1-alpha.3",
+  "version": "0.0.1-alpha.4",
   "description": "@rongcloud/adapter-plugin-rtc",
   "private": true,
   "main": "./dist/index.js",
