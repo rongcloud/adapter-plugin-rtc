@@ -4,7 +4,6 @@ import { RTCClientCtrl } from '../RTCClientCtrl'
 
 export class BasicModule {
   protected readonly _ctrl!: RTCClientCtrl
-  protected readonly _client!: RCRTCClient
 
   constructor () {
     const ctrl = RTCClientCtrl.getInstance()

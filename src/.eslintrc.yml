@@ -10,6 +10,7 @@ globals:
   __COMMIT_ID__: true
   __VERSION__: true
   __DEV__: true
+  MediaStreamConstraints: true
 parser: '@typescript-eslint/parser'
 parserOptions:
   ecmaVersion: 11

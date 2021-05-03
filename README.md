@@ -154,8 +154,8 @@ new Monitor({
 
 ##### Device
 
-* ⭕️ constructor()
-* ⭕️ get()
+* ✅ constructor()
+* ✅ get()
 
 ##### Monitor
 

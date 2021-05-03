@@ -1,6 +1,6 @@
 import { EventEmitter } from '@rongcloud/engine'
 import { RCLivingRoom, RCLivingType, RCRTCClient, RCRTCCode, RCRTCRoom } from '@rongcloud/plugin-rtc'
-import { ErrorCode, Mode, ROLE } from './enums'
+import { RCAdapterCode, Mode, ROLE } from './enums'
 import { IJoineResult } from './interfaces/IJoinedData'
 import { IRTCAdapterOptions } from './interfaces/IRTCAdapterOptions'
 import logger from './logger'
@@ -43,7 +43,7 @@ export class RTCClientCtrl extends EventEmitter {
     let data
     if (this._options.mode === Mode.LIVE) {
       if (this._options.liveRole !== ROLE.ANCHOR) {
-        return Promise.reject({ code: ErrorCode.ANDIENCE_CANNOT_JOIN_ROOM })
+        return Promise.reject({ code: RCAdapterCode.ANDIENCE_CANNOT_JOIN_ROOM })
       }
       data = await this._client.joinLivingRoom(roomId, (this._options.liveType || 0) as RCLivingType)
     } else {

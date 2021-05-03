@@ -1,5 +1,4 @@
 import { LogLevel } from '@rongcloud/engine'
-import { RCRTCCode } from '@rongcloud/plugin-rtc'
 import { IRTCAdapterOptions } from './interfaces/IRTCAdapterOptions'
 import logger from './logger'
 import { RTCClientCtrl } from './RTCClientCtrl'
