@@ -1,5 +1,5 @@
-import { RCRTCCode, RCLivingRoom, RCFrameRate, RCResolution } from '@rongcloud/plugin-rtc'
-import { StreamSize, StreamType, Resolution, Mode, ROLE, RCAdapterCode, LayoutMode, RenderMode } from '../enums'
+import { RCLivingType, RCFrameRate, RCRTCCode, RCMediaType } from '@rongcloud/plugin-rtc'
+import { StreamSize, StreamType, Resolution, Mode, ROLE, LayoutMode, RenderMode } from '../enums'
 import logger from '../logger'
 import { BasicModule } from './Basic'
 
@@ -285,14 +285,32 @@ export class Stream extends BasicModule {
     })
   }
 
-  private _subLiveAsAudience (options: ISubLiveOptions): Promise<IUserRes<IStreamInfo>> {
-    logger.error('todo -> Stream._subLiveAsAudience')
-    throw new Error('todo -> Stream._subLiveAsAudience')
+  private async _subLiveAsAudience (options: ISubLiveOptions): Promise<IUserRes<IStreamInfo>> {
+    const audience = this._ctrl.getRTCClient().getAudienceClient()
+    const livingType: RCLivingType = options.type === StreamType.AUDIO ? RCLivingType.AUDIO : RCLivingType.VIDEO
+    const mediaType: RCMediaType = options.type === StreamType.AUDIO ? RCMediaType.AUDIO_ONLY : RCMediaType.AUDIO_VIDEO
+    const { code, tracks } = await audience.subscribe(options.liveUrl, livingType, mediaType, options.size === StreamSize.MIN)
+
+    if (code !== RCRTCCode.SUCCESS) {
+      return Promise.reject({ code })
+    }
+
+    const track = tracks[0]
+    const msid = track.getStreamId()
+    const tag = track.getTag()
+    const userId = track.getUserId()
+
+    return new Promise((resolve, reject) => {
+      this._promiseMaps[msid] = { resolve, reject, options: { id: userId, stream: { tag, type: StreamType.AUDIO_AND_VIDEO } } }
+    })
   }
 
-  private _unsubLiveAsAudience (): Promise<void> {
-    logger.error('todo -> Stream._unsubLiveAsAudience')
-    throw new Error('todo -> Stream._unsubLiveAsAudience')
+  private async _unsubLiveAsAudience (): Promise<void> {
+    const audience = this._ctrl.getRTCClient().getAudienceClient()
+    const { code } = await audience.unsubscribe()
+    if (code !== RCRTCCode.SUCCESS) {
+      return Promise.reject({ code })
+    }
   }
 
   private _subscribe (options: IUserRes<IResInfo>): Promise<IUserRes<IStreamInfo>> {

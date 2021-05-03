@@ -123,25 +123,25 @@ new Monitor({
 * ✅ Monitor
 * ✅ Report
 ---
-* ⭕️ init()
-* ⭕️ destroy()
+* ✅ init()
+* ✅ destroy()
 * ⭕️ becameAuchor()
 
 ##### Room
 
-* ⭕️ constructor()
+* ✅ constructor()
 * ✅ join()
 * ✅ leave()
 * ✅ get()
 
 ##### Stream
 
-* ⭕️ constructor()
+* ✅ constructor()
 * ✅ get()
 * ✅ publish()
 * ✅ unpublish()
-* ⭕️ subscribe()
-* ⭕️ unsubscribe()
+* ✅ subscribe()
+* ✅ unsubscribe()
 * ✅ video.disable()
 * ✅ video.enable()
 * ✅ audio.mute()
