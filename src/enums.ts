@@ -57,5 +57,6 @@ export enum StreamType {
  */
 export enum RCAdapterCode {
   ANDIENCE_CANNOT_JOIN_ROOM = 53901,
-  GET_SCREEN_STREAM_FAILED = 53902
+  GET_SCREEN_STREAM_FAILED = 53902,
+  NOT_AUCHOR = 53903
 }

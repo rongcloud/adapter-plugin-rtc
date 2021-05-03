@@ -1,5 +1,5 @@
-import { RCRTCCode } from '@rongcloud/plugin-rtc'
-import { StreamSize, StreamType, Resolution, Mode, ROLE } from '../enums'
+import { RCRTCCode, RCLivingRoom } from '@rongcloud/plugin-rtc'
+import { StreamSize, StreamType, Resolution, Mode, ROLE, RCAdapterCode } from '../enums'
 import logger from '../logger'
 import { BasicModule } from './Basic'
 
@@ -326,15 +326,26 @@ export class Stream extends BasicModule {
     })
   }
 
-  setMixConfig () {
+  setMixConfig (): Promise<void> {
     logger.error('todo -> Stream.setMixConfig')
+    throw new Error('todo -> Stream.setMixConfig')
   }
 
-  addPublishStreamUrl (url: string) {
-    logger.error('todo -> Stream.addPublishStreamUrl')
+  addPublishStreamUrl (url: string): Promise<void> {
+    return this._ctrl.checkAuchorThen(async room => {
+      const { code } = await room.getMCUConfigBuilder().addPublishStreamUrls([url]).flush()
+      if (code !== RCRTCCode.SUCCESS) {
+        return Promise.reject({ code })
+      }
+    })
   }
 
-  removePublishStreamUrl (url: string) {
-    logger.error('todo -> Stream.removePublishStreamUrl')
+  removePublishStreamUrl (url: string): Promise<void> {
+    return this._ctrl.checkAuchorThen(async room => {
+      const { code } = await room.getMCUConfigBuilder().removePublishStreamUrls([url]).flush()
+      if (code !== RCRTCCode.SUCCESS) {
+        return Promise.reject({ code })
+      }
+    })
   }
 }

@@ -59,6 +59,22 @@ export class RTCClientCtrl extends EventEmitter {
     return callback(this._room)
   }
 
+  async checkAuchorThen<T> (callback: (room: RCLivingRoom) => Promise<T>): Promise<T> {
+    const mode = this.getRTCMode()
+    const role = this.getLiveRole()
+
+    if (mode !== Mode.LIVE || role !== ROLE.ANCHOR) {
+      return Promise.reject({ code: RCAdapterCode.NOT_AUCHOR })
+    }
+
+    if (!this._room) {
+      return Promise.reject({ code: RCRTCCode.NOT_IN_ROOM })
+    }
+
+    const livingRoom: RCLivingRoom = this._room as RCLivingRoom
+    return callback(livingRoom)
+  }
+
   async join (roomId: string): Promise<IJoineResult> {
     let data
     if (this._options.mode === Mode.LIVE) {
