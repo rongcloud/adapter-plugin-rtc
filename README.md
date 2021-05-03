@@ -95,7 +95,20 @@ stream.resize({
 ```typescript
 new Monitor({
   stats ({ sender, received }) {
-    // 数据内容待验证
+    // 废弃 sender.packetsLost
+
+    // 以下为当个流状态数据的改动
+    // const track: ITrackStat = sender.tracks[0]
+
+    // 废弃：track.trackState
+    // 废弃：track.codecImplementationName
+    // 废弃：track.googFirsReceived
+    // 废弃：track.googPlisReceived
+    // 废弃：track.googNacksReceived
+    // 废弃：track.googRenderDelayMs
+    // 废弃：track.trackReceived
+    // 废弃：track.samplingRate
+    // 废弃：track.googCodecName
   }
 });
 ```

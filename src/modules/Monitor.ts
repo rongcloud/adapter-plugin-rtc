@@ -20,16 +20,31 @@ export type ITrackStat = {
   packLostReceivedRate: string
   frameRate: string
   resolution: string
+  /**
+   * @deprecated
+   */
   googRenderDelayMs: string
   googJitterReceived: string
+  /**
+   * @deprecated
+   */
   googNacksReceived: string
+  /**
+   * @deprecated
+   */
   googPlisReceived: string
   googRtt: string
   /**
    * @deprecated
    */
   googFirsReceived: string
+  /**
+   * @deprecated
+   */
   codecImplementationName: string
+  /**
+   * @deprecated
+   */
   trackState: string
   streamId: string
 }
