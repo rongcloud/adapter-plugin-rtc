@@ -159,7 +159,7 @@ new Monitor({
 
 ##### Monitor
 
-* ⭕️ constructor()
+* ✅ constructor()
 
 ##### Report
 
