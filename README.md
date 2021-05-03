@@ -46,8 +46,8 @@ RongRTCAdapter.init({ client: rtcClient, bitrate, liveRole?, mode?, liveType? })
 // 由于初始化方式变更，故模块获取方式也需要变更，现在直接通过 RongRTCAdapter 顶级变量获取
 const { Room, Stream, Message, Device, Storage, StreamType, StreamSize，Mode, LiveType, ROLE } = RongRTCAdapter;
 
-// 观众上麦，替换 rongRTC.changeLiveRole 接口，接口不接收参数
-RongRTCAdapter.becameAuchor()
+// 替换 rongRTC.changeLiveRole 接口
+RongRTCAdapter.changeLiveRole(ROLE.AUCHOR)
 
 // 反初始化，相当于原 `rongRTC.destroy()`
 // 为避免内存泄露，使用该方法后，已初始化的所有功能模块将失效
@@ -125,7 +125,7 @@ new Monitor({
 ---
 * ✅ init()
 * ✅ destroy()
-* ⭕️ becameAuchor()
+* ✅ changeLiveRole()
 
 ##### Room
 

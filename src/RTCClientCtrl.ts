@@ -100,14 +100,18 @@ export class RTCClientCtrl extends EventEmitter {
   async leaveRoom () {
     const { code } = await this._client.leaveRoom(this._room!)
     if (code === RCRTCCode.SUCCESS) {
+      this._room = undefined
       return Promise.resolve()
     } else {
       return Promise.reject({ code })
     }
   }
 
-  becameAuchor () {
-    logger.error('todo -> RCClientCtrl.becameAuchor')
+  async changeLiveRole (role: ROLE) {
+    if (this._options.liveRole === ROLE.ANCHOR && this._room) {
+      await this.leaveRoom()
+    }
+    this._options.liveRole = role
   }
 
   public registerRoomEventListener (listener: IRoomEventListener) {

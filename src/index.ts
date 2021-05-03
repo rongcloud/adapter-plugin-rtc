@@ -1,4 +1,5 @@
 import { LogLevel } from '@rongcloud/engine'
+import { ROLE } from './enums'
 import { IRTCAdapterOptions } from './interfaces/IRTCAdapterOptions'
 import logger from './logger'
 import { RTCClientCtrl } from './RTCClientCtrl'
@@ -35,14 +36,14 @@ export function init (options: IRTCAdapterOptions) {
   RTCClientCtrl.init(options)
 }
 
-export function becameAuchor () {
+export function changeLiveRole (role: ROLE) {
   const ins = RTCClientCtrl.getInstance()
   if (!ins) {
     const msg = `${__NAME__} not initialized yet.`
     logger.error(msg)
     return Promise.reject(msg)
   }
-  return ins.becameAuchor()
+  return ins.changeLiveRole(role)
 }
 
 export function destroy () {
