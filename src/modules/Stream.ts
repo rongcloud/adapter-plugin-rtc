@@ -66,22 +66,50 @@ const getUserMedia = async (constraints?: any) => {
   }
 }
 
+const parseTrackIds = (type: StreamType, userId: string, tag: string): string[] => {
+  const types = type === StreamType.AUDIO_AND_VIDEO ? [StreamType.AUDIO, StreamType.VIDEO] : [type]
+  return types.map(item => `${userId}_${tag}_${item}`)
+}
+
+export interface IVideoNode {
+  disable (options: IUserRes<{ tag: string }>): Promise<void>
+  enable (options: IUserRes<{ tag: string }>): Promise<void>
+}
+
+export interface IAudioNode {
+  mute (options: IUserRes<{ tag: string }>): Promise<void>
+  unmute (options: IUserRes<{ tag: string }>): Promise<void>
+}
+
 export class Stream extends BasicModule {
-  public readonly video!: {
-    disable (options: IUserRes<{ tag: string }>): void
-    enable (options: IUserRes<{ tag: string }>): void
-  }
-
-  public readonly audio!: {
-    mute (options: IUserRes<{ tag: string }>): void
-    unmute (options: IUserRes<{ tag: string }>): void
-  }
-
   private readonly _options: IStreamInitOptions
+
+  public readonly video: IVideoNode
+  public readonly audio: IAudioNode
 
   constructor (options: IStreamInitOptions) {
     super()
     this._options = { ...options }
+
+    const _this = this
+
+    const userId = this._ctrl.getRTCClient().getCurrentId()
+    const changeTrackState = async (type: StreamType, enable: boolean, options: IUserRes<{ tag: string }>) => {
+      const trackId = parseTrackIds(type, options.id, options.stream.tag)[0]
+      return this._ctrl.checkRoomThen(async room => {
+        const track = userId === options.id ? room.getLocalTrack(trackId) : room.getRemoteTrack(trackId)
+        enable ? track.unmute() : track.mute()
+      })
+    }
+
+    this.video = {
+      disable: changeTrackState.bind(_this, StreamType.VIDEO, false),
+      enable: changeTrackState.bind(_this, StreamType.VIDEO, true)
+    }
+    this.audio = {
+      mute: changeTrackState.bind(_this, StreamType.AUDIO, false),
+      unmute: changeTrackState.bind(_this, StreamType.AUDIO, true)
+    }
   }
 
   async get (options: IGetStreamOptions): Promise<{ mediaStream: MediaStream }> {
@@ -115,24 +143,78 @@ export class Stream extends BasicModule {
     return getUserMedia(constraints)
   }
 
-  publish (options: { stream: IStreamInfo }) {
-    logger.error('todo -> Stream.publish')
+  async publish (options: { stream: IStreamInfo }): Promise<void> {
+    const { tag, type, mediaStream } = options.stream
+    const withoutAudio = type === StreamType.VIDEO
+    const withoutVideo = type === StreamType.AUDIO
+
+    const { code, tracks } = await this._ctrl.getRTCClient().createLocalTracks(tag, mediaStream, { withoutAudio, withoutVideo })
+    if (code !== RCRTCCode.SUCCESS) {
+      return Promise.reject({ code })
+    }
+
+    return this._ctrl.checkRoomThen(async (room) => {
+      const { code, liveUrl } = await room.publish(tracks)
+      if (code !== RCRTCCode.SUCCESS) {
+        return Promise.reject({ code })
+      }
+    })
   }
 
   unpublish (options: { stream: IResInfo }) {
-    logger.error('todo -> Stream.unpublish')
+    const { tag, type } = options.stream
+    const userId = this._ctrl.getRTCClient().getCurrentId()
+    const trackIds = parseTrackIds(type, userId, tag)
+
+    return this._ctrl.checkRoomThen(async room => {
+      const tracks = trackIds.map(id => room.getLocalTrack(id)).filter(item => !!item)
+      const { code } = await room.unpublish(tracks)
+      if (code !== RCRTCCode.SUCCESS) {
+        return Promise.reject({ code })
+      }
+    })
   }
 
   subscribe (options: IUserRes<IResInfo>) {
-    logger.error('todo -> Stream.subscribe')
+    const { id: userId, stream } = options
+    const { tag, type } = stream
+    const trackIds = parseTrackIds(type, userId, tag)
+
+    return this._ctrl.checkRoomThen(async room => {
+      const tracks = trackIds.map(id => room.getRemoteTrack(id)).filter(item => !!item)
+      const { code } = await room.subscribe(tracks)
+      if (code !== RCRTCCode.SUCCESS) {
+        return Promise.reject({ code })
+      }
+    })
   }
 
   unsubscribe (options: IUserRes<IResInfo>) {
-    logger.error('todo -> Stream.unsubscribe')
+    const { id: userId, stream } = options
+    const { tag, type } = stream
+    const trackIds = parseTrackIds(type, userId, tag)
+
+    return this._ctrl.checkRoomThen(async room => {
+      const tracks = trackIds.map(id => room.getRemoteTrack(id)).filter(item => !!item)
+      const { code } = await room.unsubscribe(tracks)
+      if (code !== RCRTCCode.SUCCESS) {
+        return Promise.reject({ code })
+      }
+    })
   }
 
   resize (options: IUserRes<{ tag: string, size: StreamSize }>) {
-    logger.error('todo -> Stream.resize')
+    const { id, stream } = options
+    const { tag, size } = stream
+    const trackIds = parseTrackIds(StreamType.VIDEO, id, tag)
+
+    return this._ctrl.checkRoomThen(async room => {
+      const track = trackIds.map(id => room.getRemoteTrack(id)).filter(item => !!item)[0]
+      const { code } = await room.subscribe([{ subTiny: size === StreamSize.MIN, track }])
+      if (code !== RCRTCCode.SUCCESS) {
+        return Promise.reject({ code })
+      }
+    })
   }
 
   setMixConfig () {
