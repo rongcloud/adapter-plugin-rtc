@@ -19,5 +19,6 @@ export class Message extends BasicModule {
   }
 
   send (msg: { name: string, content: unknown }) {
+    logger.error('todo -> Message.send')
   }
 }

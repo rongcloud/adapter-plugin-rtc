@@ -28,7 +28,7 @@ export class Room extends BasicModule {
   }
 
   async get (): Promise<RoomInfo | any> {
-    logger.error('todo -> get')
-    throw new Error('todo')
+    logger.error('todo -> Room.get')
+    throw new Error('todo -> Room.get')
   }
 }
