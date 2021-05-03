@@ -15,7 +15,6 @@ export class BasicModule {
     this._ctrl.on(RTCClientCtrl.__INNER_EVENT_DESTROY__, this.onDestroy, this)
   }
 
-  private onDestroy () {
-    throw new Error('TODO -> BasicModule onDestroy')
+  protected onDestroy () {
   }
 }
