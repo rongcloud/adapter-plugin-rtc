@@ -1,4 +1,6 @@
-import { RCLivingType } from '@rongcloud/plugin-rtc'
+import { RCLivingType, MixLayoutMode as LayoutMode, MixVideoRenderMode as RenderMode } from '@rongcloud/plugin-rtc'
+
+export { LayoutMode, RenderMode }
 
 export enum LiveType {
   AUDIO_AND_VIDEO = RCLivingType.VIDEO,
@@ -11,14 +13,6 @@ export enum Mode {
 
 export enum ROLE {
   ANCHOR = 1, AUDIENCE = 2
-}
-
-export enum LayoutMode {
-  CUSTOMIZE = 1, SUSPENSION = 2, ADAPTATION = 3
-}
-
-export enum RenderMode {
-  CROP = 1, WHOLE = 2
 }
 
 export enum Resolution {

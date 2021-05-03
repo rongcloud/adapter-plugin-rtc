@@ -1,5 +1,5 @@
-import { RCRTCCode, RCLivingRoom } from '@rongcloud/plugin-rtc'
-import { StreamSize, StreamType, Resolution, Mode, ROLE, RCAdapterCode } from '../enums'
+import { RCRTCCode, RCLivingRoom, RCFrameRate, RCResolution } from '@rongcloud/plugin-rtc'
+import { StreamSize, StreamType, Resolution, Mode, ROLE, RCAdapterCode, LayoutMode, RenderMode } from '../enums'
 import logger from '../logger'
 import { BasicModule } from './Basic'
 
@@ -85,6 +85,41 @@ export interface IVideoNode {
 export interface IAudioNode {
   mute (options: IUserRes<{ tag: string }>): Promise<void>
   unmute (options: IUserRes<{ tag: string }>): Promise<void>
+}
+
+export interface IMCUConfigInfo {
+  layoutMode: LayoutMode,
+  video?: {
+    renderMode?: RenderMode,
+    width?: number,
+    height?: number
+    fps?: number
+    bitrate?: number
+  },
+  tinyVideo?: {
+    width?: number,
+    height?: number
+    fps?: number
+    bitrate?: number
+  },
+  audio?: {
+    bitrate?: number
+  },
+  /**
+   * @deprecated
+   */
+  hostUserId?: string,
+  hostStreamId?: string,
+  customLayout?: {
+    video?: {
+      userId: string,
+      streamId: string,
+      x: number,
+      y: number,
+      width: number,
+      height: number
+    }[]
+  }
 }
 
 export class Stream extends BasicModule {
@@ -326,9 +361,52 @@ export class Stream extends BasicModule {
     })
   }
 
-  setMixConfig (): Promise<void> {
+  setMixConfig (options: IMCUConfigInfo): Promise<void> {
     logger.error('todo -> Stream.setMixConfig')
-    throw new Error('todo -> Stream.setMixConfig')
+    return this._ctrl.checkAuchorThen(async room => {
+      const builder = room.getMCUConfigBuilder()
+      builder.setMixLayoutMode(options.layoutMode)
+      options.hostStreamId && builder.setHostVideoTrack(options.hostStreamId + '_1')
+      if (options.video) {
+        const { renderMode, width, height, fps, bitrate } = options.video
+        renderMode && builder.setOutputVideoRenderMode(renderMode)
+        bitrate && builder.setOutputVideoBitrate(bitrate)
+        // 输出宽高及帧率配置
+        let key = `W${width}_H${height}`
+        if (key in Resolution) {
+          builder.setOutputVideoResolution((Resolution as any)[key])
+        }
+        key = `FPS_${fps}`
+        if (key in RCFrameRate) {
+          builder.setOutputVideoFPS(key as RCFrameRate)
+        }
+      }
+      if (options.tinyVideo) {
+        const { width, height, fps, bitrate } = options.tinyVideo
+        // 输出宽高及帧率配置
+        let key = `W${width}_H${height}`
+        if (key in Resolution) {
+          builder.setOutputTinyVideoResolution((Resolution as any)[key])
+        }
+        key = `FPS_${fps}`
+        if (key in RCFrameRate) {
+          builder.setOutputTinyVideoFPS(key as RCFrameRate)
+        }
+      }
+      if (options.audio) {
+        const { bitrate } = options.audio
+        bitrate && builder.setOutputAudioBitrate(bitrate)
+      }
+      if (options.customLayout && options.customLayout.video) {
+        options.customLayout.video.forEach(item => {
+          builder.addCustomizeLayoutVideo(item.streamId + '_1', item.x, item.y, item.width, item.height)
+        })
+      }
+      const { code } = await builder.flush()
+      if (code !== RCRTCCode.SUCCESS) {
+        return Promise.reject({ code })
+      }
+    })
   }
 
   addPublishStreamUrl (url: string): Promise<void> {
