@@ -93,8 +93,8 @@ export class Stream extends BasicModule {
 
     const _this = this
 
-    const userId = this._ctrl.getRTCClient().getCurrentId()
     const changeTrackState = async (type: StreamType, enable: boolean, options: IUserRes<{ tag: string }>) => {
+      const userId = this._ctrl.getRTCClient().getCurrentId()
       const trackId = parseTrackIds(type, options.id, options.stream.tag)[0]
       return this._ctrl.checkRoomThen(async room => {
         const track = userId === options.id ? room.getLocalTrack(trackId) : room.getRemoteTrack(trackId)
