@@ -78,10 +78,10 @@
   },
   "peerDependencies": {
     "@rongcloud/engine": "~4.3.3",
-    "@rongcloud/plugin-rtc": "~5.0.4"
+    "@rongcloud/plugin-rtc": "~5.0.3"
   },
   "dependencies": {
     "@rongcloud/engine": "~4.3.3",
-    "@rongcloud/plugin-rtc": "~5.0.4"
+    "@rongcloud/plugin-rtc": "~5.0.3"
   }
 }

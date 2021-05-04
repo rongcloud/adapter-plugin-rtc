@@ -22,7 +22,7 @@ export class Room extends BasicModule {
         ids.forEach(id => options.joined?.({ id }))
       },
       onUserLeave (ids) {
-        ids.forEach(id => options.joined?.({ id }))
+        ids.forEach(id => options.left?.({ id }))
       },
       onKickOff (byServer) {
         options.kick?.()

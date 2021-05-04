@@ -1,9 +1,8 @@
 import { EventEmitter } from '@rongcloud/engine'
-import { IRCRTCReportListener, IRoomEventListener, RCLivingRoom, RCAbstractRoom, RCLivingType, RCRTCClient, RCRTCCode, RCRTCRoom, IRCRTCStateReport } from '@rongcloud/plugin-rtc'
+import { IRCRTCReportListener, IRoomEventListener, RCLivingRoom, RCAbstractRoom, RCLivingType, RCRTCClient, RCRTCCode, RCRTCRoom, RCRemoteTrack } from '@rongcloud/plugin-rtc'
 import { RCAdapterCode, Mode, ROLE } from './enums'
 import { IJoineResult } from './interfaces/IJoinedData'
 import { IRTCAdapterOptions } from './interfaces/IRTCAdapterOptions'
-import logger from './logger'
 
 export class RTCClientCtrl extends EventEmitter {
   private static _instance: RTCClientCtrl | null = null
@@ -92,13 +91,24 @@ export class RTCClientCtrl extends EventEmitter {
 
     const room = data.room!
     this._setCrtRoom(room)
+
     // 找出所有人员、资源，逐个通知业务层
-    const users = room.getRemoteUserIds().map(id => ({ id }))
-    return { users }
+    const userIds = room.getRemoteUserIds()
+    userIds.forEach(userId => {
+      const tracks = room.getRemoteTracksByUserId(userId)
+      if (tracks.length) {
+        this.emit('onTrackPublish', tracks)
+      }
+    })
+
+    return { users: userIds.map(id => ({ id })) }
   }
 
   async leaveRoom () {
+    const tracks = this._room?.getLocalTracks()
     const { code } = await this._client.leaveRoom(this._room!)
+    tracks?.every(track => track.destroy())
+
     if (code === RCRTCCode.SUCCESS) {
       this._room = undefined
       return Promise.resolve()

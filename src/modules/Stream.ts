@@ -1,4 +1,4 @@
-import { RCLivingType, RCFrameRate, RCRTCCode, RCMediaType } from '@rongcloud/plugin-rtc'
+import { RCLivingType, RCFrameRate, RCRTCCode, RCMediaType, RCRemoteTrack } from '@rongcloud/plugin-rtc'
 import { StreamSize, StreamType, Resolution, Mode, ROLE, LayoutMode, RenderMode } from '../enums'
 import logger from '../logger'
 import { BasicModule } from './Basic'
@@ -166,28 +166,48 @@ export class Stream extends BasicModule {
         if (!published) {
           return
         }
-        // 两 track 合并为一条通知，与 v3 行为一致
-        const track = tracks[0]
-        const type: StreamType = tracks.length === 2
-          ? StreamType.AUDIO_AND_VIDEO
-          : track.isAudioTrack() ? StreamType.AUDIO : StreamType.VIDEO
-        const id = track.getUserId()
-        const tag = track.getTag()
-        published({ id, stream: { tag, type } })
+
+        // 两相同 tag 的 track 需合并为一条通知，与 v3 行为一致
+        const maps: { [tag: string]: RCRemoteTrack[] } = {}
+        tracks.forEach(track => {
+          const tag = track.getTag()
+          const arr = maps[tag] = maps[tag] || []
+          arr.push(track)
+        })
+
+        for (const tag in maps) {
+          const arr: RCRemoteTrack[] = maps[tag]
+          const track = arr[0]
+          const type: StreamType = arr.length === 2
+            ? StreamType.AUDIO_AND_VIDEO
+            : track.isAudioTrack() ? StreamType.AUDIO : StreamType.VIDEO
+          const id = track.getUserId()
+          published({ id, stream: { tag, type } })
+        }
       },
       onTrackUnpublish (tracks) {
         const unpublished = _this._options.unpublished
         if (!unpublished) {
           return
         }
-        // 两 track 合并为一条通知，与 v3 行为一致
-        const track = tracks[0]
-        const type: StreamType = tracks.length === 2
-          ? StreamType.AUDIO_AND_VIDEO
-          : track.isAudioTrack() ? StreamType.AUDIO : StreamType.VIDEO
-        const id = track.getUserId()
-        const tag = track.getTag()
-        unpublished({ id, stream: { tag, type } })
+
+        // 两相同 tag 的 track 需合并为一条通知，与 v3 行为一致
+        const maps: { [tag: string]: RCRemoteTrack[] } = {}
+        tracks.forEach(track => {
+          const tag = track.getTag()
+          const arr = maps[tag] = maps[tag] || []
+          arr.push(track)
+        })
+
+        for (const tag in maps) {
+          const arr: RCRemoteTrack[] = maps[tag]
+          const track = arr[0]
+          const type: StreamType = arr.length === 2
+            ? StreamType.AUDIO_AND_VIDEO
+            : track.isAudioTrack() ? StreamType.AUDIO : StreamType.VIDEO
+          const id = track.getUserId()
+          unpublished({ id, stream: { tag, type } })
+        }
       },
       onTrackReady (track) {
         const msid = track.getStreamId()
@@ -442,6 +462,17 @@ export class Stream extends BasicModule {
       if (code !== RCRTCCode.SUCCESS) {
         return Promise.reject({ code })
       }
+    })
+  }
+
+  protected onDestroy () {
+    Object.keys(this._streamMaps).forEach(key => {
+      const stream = this._streamMaps[key]
+      stream.getTracks().forEach(track => {
+        track.stop()
+        stream.removeTrack(track)
+      })
+      delete this._streamMaps[key]
     })
   }
 }
