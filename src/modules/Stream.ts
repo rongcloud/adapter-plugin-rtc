@@ -1,4 +1,4 @@
-import { RCLivingType, RCFrameRate, RCRTCCode, RCMediaType, RCRemoteTrack } from '@rongcloud/plugin-rtc'
+import { RCLivingType, RCFrameRate, RCRTCCode, RCMediaType, RCRemoteTrack, RCLocalTrack } from '@rongcloud/plugin-rtc'
 import { StreamSize, StreamType, Resolution, Mode, ROLE, LayoutMode, RenderMode } from '../enums'
 import logger from '../logger'
 import { BasicModule } from './Basic'
@@ -147,7 +147,7 @@ export class Stream extends BasicModule {
       const trackId = parseTrackIds(type, options.id, options.stream.tag)[0]
       return this._ctrl.checkRoomThen(async room => {
         const track = userId === options.id ? room.getLocalTrack(trackId) : room.getRemoteTrack(trackId)
-        enable ? track.unmute() : track.mute()
+        if (track) enable ? track.unmute() : track.mute()
       })
     }
 
@@ -297,7 +297,7 @@ export class Stream extends BasicModule {
     const trackIds = parseTrackIds(type, userId, tag)
 
     return this._ctrl.checkRoomThen(async room => {
-      const tracks = trackIds.map(id => room.getLocalTrack(id)).filter(item => !!item)
+      const tracks: RCLocalTrack[] = trackIds.map(id => room.getLocalTrack(id)!).filter(item => !!item)
       const { code } = await room.unpublish(tracks)
       if (code !== RCRTCCode.SUCCESS) {
         return Promise.reject({ code })
@@ -339,7 +339,7 @@ export class Stream extends BasicModule {
     const trackIds = parseTrackIds(type, userId, tag)
 
     return this._ctrl.checkRoomThen(async room => {
-      const tracks = trackIds.map(id => room.getRemoteTrack(id)).filter(item => !!item)
+      const tracks = trackIds.map(id => room.getRemoteTrack(id)!).filter(item => !!item)
       const { code } = await room.subscribe(tracks)
 
       if (code !== RCRTCCode.SUCCESS) {
@@ -368,7 +368,7 @@ export class Stream extends BasicModule {
     const trackIds = parseTrackIds(type, userId, tag)
 
     return this._ctrl.checkRoomThen(async room => {
-      const tracks = trackIds.map(id => room.getRemoteTrack(id)).filter(item => !!item)
+      const tracks = trackIds.map(id => room.getRemoteTrack(id)!).filter(item => !!item)
       const { code } = await room.unsubscribe(tracks)
       if (code !== RCRTCCode.SUCCESS) {
         return Promise.reject({ code })
@@ -391,7 +391,7 @@ export class Stream extends BasicModule {
     const trackIds = parseTrackIds(StreamType.VIDEO, id, tag)
 
     return this._ctrl.checkRoomThen(async room => {
-      const track = trackIds.map(id => room.getRemoteTrack(id)).filter(item => !!item)[0]
+      const track = trackIds.map(id => room.getRemoteTrack(id)!).filter(item => !!item)[0]
       const { code } = await room.subscribe([{ subTiny: size === StreamSize.MIN, track }])
       if (code !== RCRTCCode.SUCCESS) {
         return Promise.reject({ code })
