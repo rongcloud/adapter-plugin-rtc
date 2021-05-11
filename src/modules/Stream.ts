@@ -135,6 +135,7 @@ export class Stream extends BasicModule {
   }} = {}
 
   private readonly _streamMaps: { [msid: string]: MediaStream } = {}
+  private readonly _resources: MediaStream[] = []
 
   constructor (options: IStreamInitOptions) {
     super()
@@ -239,6 +240,8 @@ export class Stream extends BasicModule {
         handle({ id: track.getUserId(), stream: { tag: track.getTag(), type: StreamType.VIDEO, mediaStream } })
       }
     })
+
+    this._ctrl.on('onLeaveRoom', this._onLeaveRoom, this)
   }
 
   async get (options: IGetStreamOptions): Promise<{ mediaStream: MediaStream }> {
@@ -281,6 +284,9 @@ export class Stream extends BasicModule {
     if (code !== RCRTCCode.SUCCESS) {
       return Promise.reject({ code })
     }
+
+    // 记录 mediastream 以便于后续释放资源
+    this._resources.push(mediaStream)
 
     return this._ctrl.checkRoomThen(async (room) => {
       const { code, liveUrl } = await room.publish(tracks)
@@ -465,7 +471,13 @@ export class Stream extends BasicModule {
     })
   }
 
+  private _onLeaveRoom () {
+    this._resources.forEach(item => item.getTracks().forEach(track => track.stop()))
+    this._resources.length = 0
+  }
+
   protected onDestroy () {
+    this._onLeaveRoom()
     Object.keys(this._streamMaps).forEach(key => {
       const stream = this._streamMaps[key]
       stream.getTracks().forEach(track => {

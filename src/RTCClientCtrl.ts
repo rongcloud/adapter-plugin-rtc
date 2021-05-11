@@ -109,6 +109,8 @@ export class RTCClientCtrl extends EventEmitter {
     const { code } = await this._client.leaveRoom(this._room!)
     tracks?.every(track => track.destroy())
 
+    this.emit('onLeaveRoom')
+
     if (code === RCRTCCode.SUCCESS) {
       this._room = undefined
       return Promise.resolve()
