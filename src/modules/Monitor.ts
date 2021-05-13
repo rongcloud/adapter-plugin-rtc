@@ -131,9 +131,8 @@ export class Monitor extends BasicModule {
   constructor (options: IMonitorInitOptions) {
     super()
     this._options = { ...options }
-    const onStateReport = (report: IRCRTCStateReport) => {
+    this._ctrl.onMonitorListener = (report: IRCRTCStateReport) => {
       this._options.stats?.(parseRTCStateReport(report))
     }
-    this._ctrl.registerReportListener({ onStateReport })
   }
 }

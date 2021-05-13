@@ -1,5 +1,5 @@
 import { EventEmitter } from '@rongcloud/engine'
-import { IRCRTCReportListener, IRoomEventListener, RCLivingRoom, RCAbstractRoom, RCLivingType, RCRTCClient, RCRTCCode, RCRTCRoom, RCRemoteTrack, RCRemoteAudioTrack, RCRemoteVideoTrack } from '@rongcloud/plugin-rtc'
+import { IRCRTCReportListener, IRoomEventListener, RCLivingRoom, RCAbstractRoom, RCLivingType, RCRTCClient, RCRTCCode, RCRTCRoom, RCRemoteTrack, RCRemoteAudioTrack, RCRemoteVideoTrack, IRCRTCStateReport } from '@rongcloud/plugin-rtc'
 import { RCAdapterCode, Mode, ROLE } from './enums'
 import { IJoineResult } from './interfaces/IJoinedData'
 import { IRTCAdapterOptions } from './interfaces/IRTCAdapterOptions'
@@ -128,17 +128,13 @@ export class RTCClientCtrl extends EventEmitter {
     this._options.liveRole = role
   }
 
-  public registerReportListener (listener: IRCRTCReportListener) {
-    const tmp: any = listener
-    Object.keys(listener).forEach(key => tmp[key] && this.on(key, tmp[key]))
-  }
-
   private _setCrtRoom (room: RCRTCRoom) {
     const _this = this
     this._room = room
     room.registerReportListener({
       onStateReport (report) {
-        _this.emit('onStateReport', report)
+        _this.onReportListener?.(report)
+        _this.onMonitorListener?.(report)
       }
     })
     room.registerRoomEventListener({
@@ -185,6 +181,9 @@ export class RTCClientCtrl extends EventEmitter {
   public onAudioMuteChange?(audioTrack: RCRemoteAudioTrack): void
   public onVideoMuteChange?(videoTrack: RCRemoteVideoTrack): void
   public onRoomAttributeChange?(name: string, content?: string | undefined): void
+
+  public onReportListener? (report: IRCRTCStateReport) :void
+  public onMonitorListener? (report: IRCRTCStateReport): void
 
   private destroy () {
     this.emit(RTCClientCtrl.__INNER_EVENT_DESTROY__)

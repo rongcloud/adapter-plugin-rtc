@@ -22,20 +22,18 @@ export class Report extends BasicModule {
   constructor (options: IReportInitOptions) {
     super()
     this._options = { ...options }
-    const onStateReport = (report: IRCRTCStateReport) => {
+    this._ctrl.onReportListener = (report: IRCRTCStateReport) => {
       const { receivers, senders } = report
       const { spoke } = this._options
       if (!spoke) {
         return
       }
-
       const arrTracks: { id: string, stream: { audioLevel: number }}[] = senders
         .filter(item => item.kind === 'audio')
         .map(item => ({ stream: { audioLevel: item.audioLevel! }, id: parseUserId(item.trackId) }))
       arrTracks.push(...receivers.filter(item => item.kind === 'audio').map(item => ({ stream: { audioLevel: item.audioLevel! }, id: parseUserId(item.trackId) })))
       arrTracks.forEach(spoke)
     }
-    this._ctrl.registerReportListener({ onStateReport })
   }
 
   /**
