@@ -1,4 +1,3 @@
-import { RCRTCClient } from '@rongcloud/plugin-rtc'
 import logger from '../logger'
 import { RTCClientCtrl } from '../RTCClientCtrl'
 

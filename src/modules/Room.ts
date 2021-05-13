@@ -15,19 +15,10 @@ export class Room extends BasicModule {
   private readonly _options: IRoomInitOptions
   constructor (options: IRoomInitOptions) {
     super()
-    const _this = this
     this._options = { ...options }
-    this._ctrl.registerRoomEventListener({
-      onUserJoin (ids) {
-        ids.forEach(id => options.joined?.({ id }))
-      },
-      onUserLeave (ids) {
-        ids.forEach(id => options.left?.({ id }))
-      },
-      onKickOff (byServer) {
-        options.kick?.()
-      }
-    })
+    this._ctrl.onUserJoin = (ids) => ids.forEach(id => options.joined?.({ id }))
+    this._ctrl.onUserLeave = (ids) => ids.forEach(id => options.left?.({ id }))
+    this._ctrl.onKickOff = () => options.kick?.()
   }
 
   async join (): Promise<IJoineResult> {

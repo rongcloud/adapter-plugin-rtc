@@ -11,11 +11,9 @@ export interface IMessageInfo {
 export class Message extends BasicModule {
   constructor (options: { received: (msg: IMessageInfo) => void }) {
     super()
-    this._ctrl.registerRoomEventListener({
-      onMessageReceive (name, content, senderId, messageUId) {
-        options.received({ name, content, senderId, uId: messageUId })
-      }
-    })
+    this._ctrl.onMessageReceive = (name, content, senderId, messageUId) => {
+      options.received({ name, content, senderId, uId: messageUId })
+    }
   }
 
   send (msg: { name: string, content: unknown }) {

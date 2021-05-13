@@ -1,5 +1,5 @@
 import { EventEmitter } from '@rongcloud/engine'
-import { IRCRTCReportListener, IRoomEventListener, RCLivingRoom, RCAbstractRoom, RCLivingType, RCRTCClient, RCRTCCode, RCRTCRoom, RCRemoteTrack } from '@rongcloud/plugin-rtc'
+import { IRCRTCReportListener, IRoomEventListener, RCLivingRoom, RCAbstractRoom, RCLivingType, RCRTCClient, RCRTCCode, RCRTCRoom, RCRemoteTrack, RCRemoteAudioTrack, RCRemoteVideoTrack } from '@rongcloud/plugin-rtc'
 import { RCAdapterCode, Mode, ROLE } from './enums'
 import { IJoineResult } from './interfaces/IJoinedData'
 import { IRTCAdapterOptions } from './interfaces/IRTCAdapterOptions'
@@ -92,15 +92,17 @@ export class RTCClientCtrl extends EventEmitter {
     const room = data.room!
     this._setCrtRoom(room)
 
-    // 找出所有人员、资源，逐个通知业务层
     const userIds = room.getRemoteUserIds()
-    userIds.forEach(userId => {
-      const tracks = room.getRemoteTracksByUserId(userId)
-      if (tracks.length) {
-        this.emit('onTrackPublish', tracks)
-      }
-    })
 
+    // 找出所有人员、资源，逐个通知业务层
+    setTimeout(() => {
+      this.onUserJoin?.(userIds)
+
+      userIds.forEach(userId => {
+        const tracks = room.getRemoteTracksByUserId(userId)
+        tracks.length && this.onTrackPublish?.(tracks)
+      })
+    }, 30)
     return { users: userIds.map(id => ({ id })) }
   }
 
@@ -126,11 +128,6 @@ export class RTCClientCtrl extends EventEmitter {
     this._options.liveRole = role
   }
 
-  public registerRoomEventListener (listener: IRoomEventListener) {
-    const tmp: any = listener
-    Object.keys(listener).forEach(key => tmp[key] && this.on(key, tmp[key]))
-  }
-
   public registerReportListener (listener: IRCRTCReportListener) {
     const tmp: any = listener
     Object.keys(listener).forEach(key => tmp[key] && this.on(key, tmp[key]))
@@ -146,37 +143,48 @@ export class RTCClientCtrl extends EventEmitter {
     })
     room.registerRoomEventListener({
       onUserJoin (userIds) {
-        _this.emit('onUserJoin', userIds)
+        _this.onUserJoin?.(userIds)
       },
       onUserLeave (userIds) {
-        _this.emit('onUserLeave', userIds)
+        _this.onUserLeave?.(userIds)
       },
       onKickOff (byServer) {
-        _this.emit('onKickOff', byServer)
+        _this.onKickOff?.()
       },
-      onMessageReceive (name, content) {
-        _this.emit('onMessageReceive', name, content)
+      onMessageReceive (name: string, content: any, senderUserId: string, messageUId: string) {
+        _this.onMessageReceive?.(name, content, senderUserId, messageUId)
       },
       onTrackPublish (track) {
-        _this.emit('onTrackPublish', track)
+        _this.onTrackPublish?.(track)
       },
       onTrackUnpublish (track) {
-        _this.emit('onTrackUnpublish', track)
+        _this.onTrackUnpublish?.(track)
       },
       onTrackReady (track) {
-        _this.emit('onTrackReady', track)
+        _this.onTrackReady?.(track)
       },
       onAudioMuteChange (track) {
-        _this.emit('onAudioMuteChange', track)
+        _this.onAudioMuteChange?.(track)
       },
       onVideoMuteChange (track) {
-        _this.emit('onVideoMuteChange', track)
+        _this.onVideoMuteChange?.(track)
       },
       onRoomAttributeChange (name, content) {
-        _this.emit('onRoomAttributeChange', name, content)
+        _this.onRoomAttributeChange?.(name, content)
       }
     })
   }
+
+  public onUserJoin? (userIds: string[]): void
+  public onUserLeave? (userIds: string[]): void
+  public onKickOff? (): void
+  public onMessageReceive? (name: string, content: any, senderUserId: string, messageUId: string): void
+  public onTrackPublish? (tracks: RCRemoteTrack[]): void
+  public onTrackUnpublish?(tracks: RCRemoteTrack[]): void
+  public onTrackReady?(track: RCRemoteTrack): void
+  public onAudioMuteChange?(audioTrack: RCRemoteAudioTrack): void
+  public onVideoMuteChange?(videoTrack: RCRemoteVideoTrack): void
+  public onRoomAttributeChange?(name: string, content?: string | undefined): void
 
   private destroy () {
     this.emit(RTCClientCtrl.__INNER_EVENT_DESTROY__)
