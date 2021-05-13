@@ -25,7 +25,9 @@ npm i @rongcloud/adapter-plugin-rtc
 
 ### CHANGE
 
-以下列出的是相较于老版本 RongRTC-v3，使用 RongRTCAdapter 所需要进行的修改内容
+以下列出的是相较于老版本 RongRTC-v3，使用 RongRTCAdapter 所需要进行的修改内容。
+
+> **桥接层中的模块，多次初始化后仅最后一次的初始化回调数据有效**
 
 ##### Init
 
