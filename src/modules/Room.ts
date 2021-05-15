@@ -40,4 +40,10 @@ export class Room extends BasicModule {
       return { id, total }
     })
   }
+
+  getSessionId () {
+  }
+
+  getStats () {
+  }
 }

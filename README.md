@@ -148,6 +148,8 @@ new Monitor({
 * ✅ join()
 * ✅ leave()
 * ✅ get()
+* ⭕️ getSessionId ()
+* ⭕️ getStats ()
 
 ##### Stream
 
