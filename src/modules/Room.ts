@@ -1,4 +1,4 @@
-import { RCRTCCode } from '@rongcloud/plugin-rtc'
+import { RCMediaType, RCRTCCode } from '@rongcloud/plugin-rtc'
 import { IJoineResult } from '../interfaces/IJoinedData'
 import { BasicModule } from './Basic'
 
@@ -8,6 +8,8 @@ export interface IRoomInitOptions {
   left? (user: { id: string }): void
   kick? (): void
 }
+
+export interface IUserState { mediaType: RCMediaType, state: 0 | 1, tag: string }
 
 export interface RoomInfo { id: string, total: number }
 
@@ -42,8 +44,24 @@ export class Room extends BasicModule {
   }
 
   getSessionId () {
+    return this._ctrl.checkRoomThen(async room => {
+      return room.getSessionId()
+    })
   }
 
-  getStats () {
+  getStats (): Promise<{ [userId: string]: IUserState[] }> {
+    return this._ctrl.checkRoomThen(async room => {
+      const data: { [userId: string]: IUserState[] } = {}
+      room.getRemoteUserIds().forEach(userId => {
+        data[userId] = room.getRemoteTracksByUserId(userId).map(item => {
+          return {
+            tag: item.getTag(),
+            state: item.isLocalMuted() || item.isOwnerMuted() ? 0 : 1,
+            mediaType: item.isAudioTrack() ? RCMediaType.AUDIO_ONLY : RCMediaType.VIDEO_ONLY
+          }
+        })
+      })
+      return data
+    })
   }
 }
