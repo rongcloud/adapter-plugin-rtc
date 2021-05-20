@@ -151,7 +151,8 @@ export class Stream extends BasicModule {
   private readonly _promiseMaps: { [msid: string]: {
     resolve: (data: IUserRes<IOutputInfo>) => void,
     reject: (reason?: any) => void,
-    options: IUserRes<IResInfo>
+    options: IUserRes<IResInfo>,
+    tracks: RCRemoteTrack[]
   }} = {}
 
   private static readonly _streamMaps: { [msid: string]: MediaStream } = {}
@@ -234,11 +235,15 @@ export class Stream extends BasicModule {
       // 清理原轨道数据
       const tracks = track.isAudioTrack() ? mediaStream.getAudioTracks() : mediaStream.getVideoTracks()
       tracks.forEach(item => mediaStream.removeTrack(item))
-      mediaStream.addTrack(track.__innerGetMediaStreamTrack()!)
       const data = _this._promiseMaps[msid]
       if (data) {
-        const { options, resolve } = data
+        const { options, resolve, tracks } = data
+        _this._promiseMaps[msid].tracks.push(track)
+        if (options.stream.type === StreamType.AUDIO_AND_VIDEO && tracks.length < 2) {
+          return
+        }
         delete _this._promiseMaps[msid]
+        tracks.forEach(track => mediaStream.addTrack(track.__innerGetMediaStreamTrack()!))
         resolve({
           id: options.id,
           stream: {
@@ -372,7 +377,7 @@ export class Stream extends BasicModule {
     const userId = track.getUserId()
 
     return new Promise((resolve, reject) => {
-      this._promiseMaps[msid] = { resolve, reject, options: { id: userId, stream: { tag, type: StreamType.AUDIO_AND_VIDEO } } }
+      this._promiseMaps[msid] = { resolve, reject, options: { id: userId, stream: { tag, type: StreamType.AUDIO_AND_VIDEO } }, tracks: [] }
     })
   }
 
@@ -399,7 +404,7 @@ export class Stream extends BasicModule {
 
       const msid = tracks[0].getStreamId()
       return new Promise((resolve, reject) => {
-        this._promiseMaps[msid] = { resolve, reject, options: { id: userId, stream: { tag, type } } }
+        this._promiseMaps[msid] = { resolve, reject, options: { id: userId, stream: { tag, type } }, tracks: [] }
       })
     })
   }
