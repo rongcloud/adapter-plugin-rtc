@@ -9,43 +9,67 @@ export type IStorageMessage = {
 }
 
 export class Storage extends BasicModule {
-  set (key: string, value: string, msg?: IStorageMessage) {
-    logger.debug(`Storage.set -> key: ${key}, value: ${value}, msg: ${JSON.stringify(msg)}`)
+  private _set (key: string, value: string, msg?: IStorageMessage, isInner: boolean = false, funcName: string = 'Storage.set'): Promise<void> {
+    logger.debug(`${JSON.stringify(funcName)} -> key: ${key}, value: ${value}, msg: ${JSON.stringify(msg)}`)
     return this._ctrl.checkRoomThen(async (room) => {
-      const { code } = await room.setRoomAttribute(key, value, msg)
+      const { code } = await room.setRoomAttribute(key, value, msg, isInner)
       if (code === RCRTCCode.SUCCESS) {
-        logger.info(`Storage.set succeed -> key: ${key}, value: ${value}, msg: ${JSON.stringify(msg)}`)
+        logger.info(`${JSON.stringify(funcName)} succeed -> key: ${key}, value: ${value}, msg: ${JSON.stringify(msg)}`)
         return Promise.resolve()
       }
-      logger.error(`Storage.set failed -> code: ${code}, key: ${key}, value: ${value}`)
+      logger.error(`${JSON.stringify(funcName)} failed -> code: ${code}, key: ${key}, value: ${value}`)
       return Promise.reject({ code })
     })
   }
 
-  get (keys: string | string[]): Promise<KVString> {
+  private _get (keys: string | string[], isInner: boolean = false, funcName: string = 'Storage.get') {
     const attrs = typeof keys === 'string' ? [keys] : keys
-    logger.debug(`Storage.get -> keys: ${attrs}`)
+    logger.debug(`${JSON.stringify(funcName)} -> keys: ${attrs}`)
     return this._ctrl.checkRoomThen(async (room) => {
-      const { data, code } = await room.getRoomAttributes(attrs)
+      const { data, code } = await room.getRoomAttributes(attrs, isInner)
       if (code === RCRTCCode.SUCCESS) {
-        logger.info(`Storage.get succeed -> keys: ${attrs}`)
+        logger.info(`${JSON.stringify(funcName)} succeed -> keys: ${attrs}`)
         return data!
       }
-      logger.error(`Storage.get failed -> keys: ${attrs}`)
+      logger.error(`${JSON.stringify(funcName)} failed -> keys: ${attrs}`)
       return Promise.reject({ code })
     })
   }
 
-  remove (key: string, msg: IStorageMessage): Promise<void> {
-    logger.debug(`Storage.remove -> key: ${key}, msg: ${JSON.stringify(msg)}`)
+  private _remove (key: string, msg: IStorageMessage, isInner: boolean = false, funcName: string = 'Storage.remove') {
+    logger.debug(`${JSON.stringify(funcName)} -> key: ${key}, msg: ${JSON.stringify(msg)}`)
     return this._ctrl.checkRoomThen(async (room) => {
       const { code } = await room.deleteRoomAttributes([key], msg)
       if (code === RCRTCCode.SUCCESS) {
-        logger.info(`Storage.remove succeed -> key: ${key}`)
+        logger.info(`${JSON.stringify(funcName)} succeed -> key: ${key}`)
         return
       }
-      logger.error(`Storage.remove failed -> code: ${code}, key: ${key}`)
+      logger.error(`${JSON.stringify(funcName)} failed -> code: ${code}, key: ${key}`)
       return Promise.reject({ code })
     })
+  }
+
+  set (key: string, value: string, msg?: IStorageMessage) {
+    return this._set(key, value, msg)
+  }
+
+  get (keys: string | string[]): Promise<KVString> {
+    return this._get(keys)
+  }
+
+  remove (key: string, msg: IStorageMessage): Promise<void> {
+    return this._remove(key, msg)
+  }
+
+  __innerSet (key: string, value: string, msg?: IStorageMessage): Promise<void> {
+    return this._set(key, value, msg, true, 'Storage.__innerSet')
+  }
+
+  __innerGet (keys: string | string[]): Promise<KVString> {
+    return this._get(keys, true, 'Stroage.__innerGet')
+  }
+
+  __innerRemove (key: string, msg: IStorageMessage): Promise<void> {
+    return this._remove(key, msg, true, 'Stroage.__innerRemove')
   }
 }
