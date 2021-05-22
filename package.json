@@ -1,6 +1,6 @@
 {
   "name": "@rongcloud/adapter-plugin-rtc",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "@rongcloud/adapter-plugin-rtc",
   "private": true,
   "main": "./dist/index.js",
@@ -77,11 +77,11 @@
     "validate-commit-msg": "^2.14.0"
   },
   "peerDependencies": {
-    "@rongcloud/engine": "^4.3.3",
-    "@rongcloud/plugin-rtc": "^5.0.4"
+    "@rongcloud/engine": "^4.3.6",
+    "@rongcloud/plugin-rtc": "^5.0.7"
   },
   "dependencies": {
-    "@rongcloud/engine": "^4.3.3",
-    "@rongcloud/plugin-rtc": "^5.0.4"
+    "@rongcloud/engine": "^4.3.6",
+    "@rongcloud/plugin-rtc": "^5.0.7"
   }
 }
