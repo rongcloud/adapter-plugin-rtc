@@ -35,7 +35,8 @@ const globals = {
 const consts = {
   __COMMIT_ID__: JSON.stringify(commitId),
   __VERSION__: JSON.stringify(pkg.version),
-  __DEV__: false
+  __DEV__: false,
+  __NAME__: JSON.stringify(attrs.globals)
 }
 
 const plugins = [
