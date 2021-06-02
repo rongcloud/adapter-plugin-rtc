@@ -108,7 +108,6 @@ new Monitor({
     // 废弃：track.googPlisReceived
     // 废弃：track.googNacksReceived
     // 废弃：track.googRenderDelayMs
-    // 废弃：track.trackReceived
     // 废弃：track.samplingRate
     // 废弃：track.googCodecName
   }

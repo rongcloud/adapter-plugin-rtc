@@ -88,7 +88,7 @@ const trans2ITrackStat = (iceCandidatePair: IRCCandidatePairStat | undefined, it
     samplingRate: '',
     frameRate: item.frameRate?.toString() || '',
     packLostReceivedRate: item.packetsLostRate.toString(),
-    trackReceived: '',
+    trackReceived: item.bitrate.toString(),
     resolution: item.frameWidth && item.frameHeight ? [item.frameWidth, item.frameHeight].join('x') : '',
     googFirsReceived: '',
     googRenderDelayMs: '',
