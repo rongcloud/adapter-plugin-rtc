@@ -51,11 +51,11 @@ export class RTCClientCtrl extends EventEmitter {
    * @param callback
    * @returns
    */
-  async checkRoomThen<T> (callback: (room: RCAbstractRoom) => Promise<T>): Promise<T> {
+  async checkRoomThen<T> (callback: (room: RCAbstractRoom, userId: string) => Promise<T>): Promise<T> {
     if (!this._room) {
       return Promise.reject({ code: RCRTCCode.NOT_IN_ROOM })
     }
-    return callback(this._room)
+    return callback(this._room, this._client.getCurrentId())
   }
 
   async checkAuchorThen<T> (callback: (room: RCLivingRoom) => Promise<T>): Promise<T> {

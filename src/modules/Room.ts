@@ -1,4 +1,4 @@
-import { RCMediaType, RCRTCCode } from '@rongcloud/plugin-rtc'
+import { RCMediaType, RCRTCCode, RCTrack } from '@rongcloud/plugin-rtc'
 import { IJoineResult } from '../interfaces/IJoinedData'
 import { BasicModule } from './Basic'
 
@@ -50,17 +50,19 @@ export class Room extends BasicModule {
   }
 
   getStats (): Promise<{ [userId: string]: IUserState[] }> {
-    return this._ctrl.checkRoomThen(async room => {
+    return this._ctrl.checkRoomThen(async (room, crtUserId) => {
       const data: { [userId: string]: IUserState[] } = {}
+      const trans = (item: RCTrack): IUserState => {
+        return {
+          tag: item.getTag(),
+          state: item.isLocalMuted() || item.isOwnerMuted() ? 0 : 1,
+          mediaType: item.isAudioTrack() ? RCMediaType.AUDIO_ONLY : RCMediaType.VIDEO_ONLY
+        }
+      }
       room.getRemoteUserIds().forEach(userId => {
-        data[userId] = room.getRemoteTracksByUserId(userId).map(item => {
-          return {
-            tag: item.getTag(),
-            state: item.isLocalMuted() || item.isOwnerMuted() ? 0 : 1,
-            mediaType: item.isAudioTrack() ? RCMediaType.AUDIO_ONLY : RCMediaType.VIDEO_ONLY
-          }
-        })
+        data[userId] = room.getRemoteTracksByUserId(userId).map(trans)
       })
+      data[crtUserId] = room.getRemoteTracks().map(trans)
       return data
     })
   }
