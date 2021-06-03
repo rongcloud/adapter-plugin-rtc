@@ -13,9 +13,6 @@ export type ITrackStat = {
    * @deprecated
    */
   samplingRate: string
-  /**
-   * @deprecated
-   */
   trackReceived: string
   packLostReceivedRate: string
   frameRate: string
