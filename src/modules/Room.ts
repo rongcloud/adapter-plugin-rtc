@@ -62,7 +62,7 @@ export class Room extends BasicModule {
       room.getRemoteUserIds().forEach(userId => {
         data[userId] = room.getRemoteTracksByUserId(userId).map(trans)
       })
-      data[crtUserId] = room.getRemoteTracks().map(trans)
+      data[crtUserId] = room.getLocalTracks().map(trans)
       return data
     })
   }
