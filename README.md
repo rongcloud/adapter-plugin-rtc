@@ -33,12 +33,12 @@ npm i @rongcloud/adapter-plugin-rtc
 
 ```typescript
 // 以 RongIMLib v2 举例
-import RongIMLib from '@rongcloud/imlib-v2'
+import { RongIMClient } from '@rongcloud/imlib-v2'
 import { installer, RCRTCClient } from '@rongcloud/plugin-rtc'
 import * as RongRTCAdapter from '@rongcloud/rtc-v3-adapter'
 
 // IM 客户端初始化，此处以 IMLib 2.8 举例
-const imClient = RongIMLib.init(appkey, null, { ...options })
+const imClient = RongIMClient.init(appkey, null, { ...options })
 // rtc v5 客户端初始化
 const rtcClient: RCRTCClient = imClient.install(installer, { ...options })
 
