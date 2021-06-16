@@ -396,16 +396,15 @@ export class Stream extends BasicModule {
 
     return this._ctrl.checkRoomThen(async room => {
       const tracks = trackIds.map(id => room.getRemoteTrack(id)!).filter(item => !!item)
+      const msid = tracks[0].getStreamId()
+      const promise = new Promise((resolve, reject) => {
+        this._promiseMaps[msid] = { resolve, reject, options: { id: userId, stream: { tag, type } }, tracks: [] }
+      })
       const { code } = await room.subscribe(tracks)
-
       if (code !== RCRTCCode.SUCCESS) {
         return Promise.reject({ code })
       }
-
-      const msid = tracks[0].getStreamId()
-      return new Promise((resolve, reject) => {
-        this._promiseMaps[msid] = { resolve, reject, options: { id: userId, stream: { tag, type } }, tracks: [] }
-      })
+      return <IUserRes<IOutputInfo>><unknown>promise
     })
   }
 
