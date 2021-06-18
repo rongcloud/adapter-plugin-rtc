@@ -16,7 +16,8 @@
     "release": "node scripts/release.prod",
     "dev": "node scripts/release.dev && cd release/npm && npm link",
     "lint": "eslint --ext .js,.ts .",
-    "fix": "npm run lint -- --fix"
+    "fix": "npm run lint -- --fix",
+    "upload-cdn": "node scripts/upload-cdn.js"
   },
   "keywords": [
     "RongCloud",
@@ -74,7 +75,8 @@
     "rollup-plugin-dts": "^2.0.1",
     "rollup-plugin-terser": "^7.0.2",
     "typescript": "^4.1.3",
-    "validate-commit-msg": "^2.14.0"
+    "validate-commit-msg": "^2.14.0",
+    "qiniu": "^7.3.3"
   },
   "peerDependencies": {
     "@rongcloud/engine": "^4.3.6",
