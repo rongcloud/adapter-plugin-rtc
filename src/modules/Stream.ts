@@ -424,6 +424,7 @@ export class Stream extends BasicModule {
 
     return this._ctrl.checkRoomThen(async room => {
       const tracks = trackIds.map(id => room.getRemoteTrack(id)!).filter(item => !!item)
+      if (tracks.length === 0) return
       const { code } = await room.unsubscribe(tracks)
       if (code !== RCRTCCode.SUCCESS) {
         return Promise.reject({ code })
