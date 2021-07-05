@@ -1,5 +1,5 @@
 import { EventEmitter } from '@rongcloud/engine'
-import { IRCRTCReportListener, IRoomEventListener, RCLivingRoom, RCAbstractRoom, RCLivingType, RCRTCClient, RCRTCCode, RCRTCRoom, RCRemoteTrack, RCRemoteAudioTrack, RCRemoteVideoTrack, IRCRTCStateReport } from '@rongcloud/plugin-rtc'
+import { IRCRTCReportListener, IRoomEventListener, RCLivingRoom, RCAbstractRoom, RCLivingType, RCRTCClient, RCRTCCode, RCRTCRoom, RCRemoteTrack, RCRemoteAudioTrack, RCRemoteVideoTrack, IRCRTCStateReport, RCLocalAudioTrack } from '@rongcloud/plugin-rtc'
 import { RCAdapterCode, Mode, ROLE } from './enums'
 import { IJoineResult } from './interfaces/IJoinedData'
 import { IRTCAdapterOptions } from './interfaces/IRTCAdapterOptions'
@@ -184,6 +184,21 @@ export class RTCClientCtrl extends EventEmitter {
 
   public onReportListener? (report: IRCRTCStateReport) :void
   public onMonitorListener? (report: IRCRTCStateReport): void
+
+  public onReportSpokeListener? (user: { id: string, stream: { audioLevel: number } }): void
+  public startAudioLevelChangeEvent (frequency: number | undefined): void {
+    this._room?.onAudioLevelChange((audioLevelReportList: {track: RCLocalAudioTrack | RCRemoteAudioTrack, audioLevel: number}[]) => {
+      audioLevelReportList.forEach(item => {
+        const data = {
+          id: item.track.getUserId(),
+          stream: {
+            audioLevel: item.audioLevel
+          }
+        }
+        this.onReportSpokeListener && this.onReportSpokeListener(data)
+      })
+    }, frequency)
+  }
 
   private destroy () {
     this.emit(RTCClientCtrl.__INNER_EVENT_DESTROY__)
