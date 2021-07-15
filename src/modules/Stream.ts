@@ -465,7 +465,7 @@ export class Stream extends BasicModule {
         renderMode && builder.setOutputVideoRenderMode(renderMode)
         bitrate && builder.setOutputVideoBitrate(bitrate)
         // 输出宽高及帧率配置
-        let key = `W${width}_H${height}`
+        let key = `${width}_${height}`
         if (key in Resolution) {
           builder.setOutputVideoResolution((Resolution as any)[key])
         }
@@ -477,7 +477,7 @@ export class Stream extends BasicModule {
       if (options.tinyVideo) {
         const { width, height, fps, bitrate } = options.tinyVideo
         // 输出宽高及帧率配置
-        let key = `W${width}_H${height}`
+        let key = `${width}_${height}`
         if (key in Resolution) {
           builder.setOutputTinyVideoResolution((Resolution as any)[key])
         }
