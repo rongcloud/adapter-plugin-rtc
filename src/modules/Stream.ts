@@ -456,7 +456,6 @@ export class Stream extends BasicModule {
   }
 
   setMixConfig (options: IMCUConfigInfo): Promise<void> {
-    logger.error('todo -> Stream.setMixConfig')
     return this._ctrl.checkAuchorThen(async room => {
       const builder = room.getMCUConfigBuilder()
       builder.setMixLayoutMode(options.layoutMode)
