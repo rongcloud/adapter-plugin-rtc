@@ -31,6 +31,7 @@ module.exports = (buildScripts) => {
 
     delete pkg.private
     delete pkg.devDependencies
+    delete pkg.dependencies
     delete pkg.scripts
     delete pkg.husky
     delete pkg['lint-staged']
