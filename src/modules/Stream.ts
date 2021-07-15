@@ -1,4 +1,4 @@
-import { RCLivingType, RCFrameRate, RCRTCCode, RCMediaType, RCRemoteTrack, RCLocalTrack, RCTrack } from '@rongcloud/plugin-rtc'
+import { RCLivingType, RCFrameRate, RCRTCCode, RCMediaType, RCRemoteTrack, RCLocalTrack, RCTrack, RCResolution } from '@rongcloud/plugin-rtc'
 import { StreamSize, StreamType, Resolution, Mode, ROLE, LayoutMode, RenderMode } from '../enums'
 import logger from '../logger'
 import { BasicModule } from './Basic'
@@ -140,6 +140,13 @@ const getEnableByMediaStream = (mediaStream: MediaStream): { audio: boolean, vid
   const audio = !!mediaStream.getAudioTracks()[0]?.enabled
   const video = !!mediaStream.getVideoTracks()[0]?.enabled
   return { audio, video }
+}
+
+const tranToV5Resolution = (resolution: Resolution): RCResolution => {
+  const arr = resolution.split('_')
+  const width = arr[1]
+  const height = arr[2]
+  return `W${width}_H${height}` as RCResolution
 }
 
 export class Stream extends BasicModule {
@@ -467,7 +474,8 @@ export class Stream extends BasicModule {
         // 输出宽高及帧率配置
         let key = `${width}_${height}`
         if (key in Resolution) {
-          builder.setOutputVideoResolution((Resolution as any)[key])
+          const resolution = tranToV5Resolution((Resolution as any)[key])
+          builder.setOutputVideoResolution(resolution)
         }
         key = `FPS_${fps}`
         if (key in RCFrameRate) {
@@ -479,7 +487,8 @@ export class Stream extends BasicModule {
         // 输出宽高及帧率配置
         let key = `${width}_${height}`
         if (key in Resolution) {
-          builder.setOutputTinyVideoResolution((Resolution as any)[key])
+          const resolution = tranToV5Resolution((Resolution as any)[key])
+          builder.setOutputTinyVideoResolution(resolution)
         }
         key = `FPS_${fps}`
         if (key in RCFrameRate) {
