@@ -246,11 +246,13 @@ export class Stream extends BasicModule {
       if (data) {
         const { options, resolve, tracks } = data
         _this._promiseMaps[msid].tracks.push(track)
-        if (options.stream.type === StreamType.AUDIO_AND_VIDEO && tracks.length < 2) {
+        tracks.forEach(track => mediaStream.addTrack(track.__innerGetMediaStreamTrack()!))
+
+        if (options.stream.type === StreamType.AUDIO_AND_VIDEO && mediaStream.getTracks().length < 2) {
           return
         }
         delete _this._promiseMaps[msid]
-        tracks.forEach(track => mediaStream.addTrack(track.__innerGetMediaStreamTrack()!))
+
         resolve({
           id: options.id,
           stream: {
