@@ -14,7 +14,12 @@ export type ITrackStat = {
    */
   samplingRate: string
   trackReceived: string
+  /**
+   * 该参数即将废弃，请使用 `packetsLostRate` 值
+   * @deprecated
+   */
   packLostReceivedRate: string
+  packetsLostRate: string
   frameRate: string
   resolution: string
   /**
@@ -85,6 +90,7 @@ const trans2ITrackStat = (iceCandidatePair: IRCCandidatePairStat | undefined, it
     samplingRate: '',
     frameRate: item.frameRate?.toString() || '',
     packLostReceivedRate: item.packetsLostRate?.toString() || '',
+    packetsLostRate: item.packetsLostRate?.toString() || '',
     trackReceived: item.bitrate?.toString(),
     resolution: item.frameWidth && item.frameHeight ? [item.frameWidth, item.frameHeight].join('x') : '',
     googFirsReceived: '',
