@@ -185,21 +185,6 @@ export class RTCClientCtrl extends EventEmitter {
   public onReportListener? (report: IRCRTCStateReport) :void
   public onMonitorListener? (report: IRCRTCStateReport): void
 
-  public onReportSpokeListener? (user: { id: string, stream: { audioLevel: number } }): void
-  public startAudioLevelChangeEvent (frequency: number | undefined): void {
-    this._room?.onAudioLevelChange((audioLevelReportList: {track: RCLocalAudioTrack | RCRemoteAudioTrack, audioLevel: number}[]) => {
-      audioLevelReportList.forEach(item => {
-        const data = {
-          id: item.track.getUserId(),
-          stream: {
-            audioLevel: item.audioLevel
-          }
-        }
-        this.onReportSpokeListener && this.onReportSpokeListener(data)
-      })
-    }, frequency)
-  }
-
   private destroy () {
     this.emit(RTCClientCtrl.__INNER_EVENT_DESTROY__)
     this.clear()
