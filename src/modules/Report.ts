@@ -7,9 +7,6 @@ export interface IReportInitOptions {
 }
 
 export interface IReportStartOptions {
-  /**
-   * @deprecated
-   */
   frequency: number
 }
 
