@@ -171,6 +171,9 @@ export class Stream extends BasicModule {
     const _this = this
 
     const changeTrackState = async (type: StreamType, enable: boolean, options: IUserRes<{ tag: string }>) => {
+      logger.info(`changeTrackState -> type: ${type}, enable: ${enable}, options: ${JSON.stringify({
+        id: options.id, stream: { tag: options.stream.tag }
+      })}`)
       const userId = this._ctrl.getRTCClient().getCurrentId()
       const trackId = parseTrackIds(type, options.id, options.stream.tag)[0]
       return this._ctrl.checkRoomThen(async room => {
