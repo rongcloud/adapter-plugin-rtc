@@ -245,6 +245,7 @@ export class Stream extends BasicModule {
       // 清理原轨道数据
       const tracks = track.isAudioTrack() ? mediaStream.getAudioTracks() : mediaStream.getVideoTracks()
       tracks.forEach(item => mediaStream.removeTrack(item))
+
       const data = _this._promiseMaps[msid]
       if (data) {
         const { options, resolve, tracks } = data
@@ -408,15 +409,22 @@ export class Stream extends BasicModule {
 
     return this._ctrl.checkRoomThen(async room => {
       const tracks = trackIds.map(id => room.getRemoteTrack(id)!).filter(item => !!item)
-      const msid = tracks[0].getStreamId()
-      const promise = new Promise((resolve, reject) => {
-        this._promiseMaps[msid] = { resolve, reject, options: { id: userId, stream: { tag, type } }, tracks: [] }
-      })
-      const { code } = await room.subscribe(tracks)
-      if (code !== RCRTCCode.SUCCESS) {
-        return Promise.reject({ code })
+      if (tracks.length === 0) {
+        logger.error(`cannot found tracks to sub, tracks.length is 0 -> options: ${JSON.stringify({
+          id: userId, stream: { tag, type }
+        })}`)
+        return Promise.reject({ code: RCRTCCode.PARAMS_ERROR })
       }
-      return <IUserRes<IOutputInfo>><unknown>promise
+      const msid = tracks[0].getStreamId()
+      return new Promise<IUserRes<IOutputInfo>>((resolve, reject) => {
+        this._promiseMaps[msid] = { resolve, reject, options: { id: userId, stream: { tag, type } }, tracks: [] }
+        room.subscribe(tracks).then(({ code }) => {
+          if (code !== RCRTCCode.SUCCESS) {
+            reject({ code })
+            delete this._promiseMaps[msid]
+          }
+        })
+      })
     })
   }
 
@@ -424,9 +432,13 @@ export class Stream extends BasicModule {
     const mode = this._ctrl.getRTCMode()
     const role = this._ctrl.getLiveRole()
     if (mode === Mode.LIVE && role === ROLE.AUDIENCE) {
-      return this._subLiveAsAudience(options as ISubLiveOptions)
+      const attrs: ISubLiveOptions = options as ISubLiveOptions
+      logger.info(`subscribe -> ${JSON.stringify({ liveUrl: attrs.liveUrl, type: attrs.type, size: attrs.size })}`)
+      return this._subLiveAsAudience(attrs)
     }
-    return this._subscribe(options as IUserRes<IResInfo>)
+    const attrs: IUserRes<IResInfo> = options as IUserRes<IResInfo>
+    logger.info(`subscribe -> ${JSON.stringify({ id: attrs.id, stream: { tag: attrs.stream.tag, type: attrs.stream.type } })}`)
+    return this._subscribe(attrs)
   }
 
   private _unsubscribe (options: IUserRes<IResInfo>) {
