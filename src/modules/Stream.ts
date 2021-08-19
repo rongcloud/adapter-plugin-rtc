@@ -1,4 +1,4 @@
-import { RCLivingType, RCFrameRate, RCRTCCode, RCMediaType, RCRemoteTrack, RCLocalTrack, RCTrack, RCResolution } from '@rongcloud/plugin-rtc'
+import { RCLivingType, RCFrameRate, RCRTCCode, RCMediaType, RCRemoteTrack, RCLocalTrack, RCTrack, RCResolution, RCRTCRoom } from '@rongcloud/plugin-rtc'
 import { StreamSize, StreamType, Resolution, Mode, ROLE, LayoutMode, RenderMode } from '../enums'
 import logger from '../logger'
 import { BasicModule } from './Basic'
@@ -268,40 +268,36 @@ export class Stream extends BasicModule {
       }
     }
 
-    this._ctrl.onAudioMuteChange = (track) => {
-      const enable = !track.isOwnerMuted()
-      const mediaStream = Stream._streamMaps[track.getStreamId()]
-      const handle = enable ? _this._options.unmuted : _this._options.muted
+    const onMediaMuteChange = (type: StreamType, track: RCRemoteTrack, room: RCRTCRoom, handle: (user: IUserRes<IOutputInfo>) => void) => {
       if (!handle) {
         return
       }
+      const msid = track.getStreamId()
+      const audioTrack = track.isAudioTrack() ? track : room.getRemoteTrack(msid + '_0')
+      const videoTrack = track.isVideoTrack() ? track : room.getRemoteTrack(msid + '_1')
+
       handle({
         id: track.getUserId(),
         stream: {
           tag: track.getTag(),
-          type: StreamType.AUDIO,
-          mediaStream,
-          enable: getEnableByMediaStream(mediaStream)
+          type,
+          mediaStream: Stream._streamMaps[track.getStreamId()],
+          enable: {
+            audio: !!(audioTrack && !(audioTrack.isLocalMuted() || audioTrack.isOwnerMuted())),
+            video: !!(videoTrack && !(videoTrack.isLocalMuted() || videoTrack.isOwnerMuted()))
+          }
         }
       })
     }
 
-    this._ctrl.onVideoMuteChange = (track) => {
+    this._ctrl.onAudioMuteChange = (track, room) => {
       const enable = !track.isOwnerMuted()
-      const mediaStream = Stream._streamMaps[track.getStreamId()]
-      const handle = enable ? _this._options.enabled : _this._options.disabled
-      if (!handle) {
-        return
-      }
-      handle({
-        id: track.getUserId(),
-        stream: {
-          tag: track.getTag(),
-          type: StreamType.VIDEO,
-          mediaStream,
-          enable: getEnableByMediaStream(mediaStream)
-        }
-      })
+      onMediaMuteChange(StreamType.AUDIO, track, room, enable ? _this._options.unmuted : _this._options.muted)
+    }
+
+    this._ctrl.onVideoMuteChange = (track, room) => {
+      const enable = !track.isOwnerMuted()
+      onMediaMuteChange(StreamType.VIDEO, track, room, enable ? _this._options.enabled : _this._options.disabled)
     }
 
     this._ctrl.on('onLeaveRoom', this._onLeaveRoom, this)
@@ -406,6 +402,11 @@ export class Stream extends BasicModule {
     const { id: userId, stream } = options as IUserRes<IResInfo>
     const { tag, type } = stream
     const trackIds = parseTrackIds(type, userId, tag)
+
+    // TODO:
+    // 需订阅的资源是否已有部分或全部订阅
+    // 已全部订阅的资源，直接返回相应流
+    // 已订阅部分的资源，等待剩余部分订阅完成后返回的 onTrackReady 通知
 
     return this._ctrl.checkRoomThen(async room => {
       const tracks = trackIds.map(id => room.getRemoteTrack(id)!).filter(item => !!item)

@@ -160,10 +160,10 @@ export class RTCClientCtrl extends EventEmitter {
         _this.onTrackReady?.(track)
       },
       onAudioMuteChange (track) {
-        _this.onAudioMuteChange?.(track)
+        _this.onAudioMuteChange?.(track, room)
       },
       onVideoMuteChange (track) {
-        _this.onVideoMuteChange?.(track)
+        _this.onVideoMuteChange?.(track, room)
       },
       onRoomAttributeChange (name, content) {
         _this.onRoomAttributeChange?.(name, content)
@@ -178,8 +178,8 @@ export class RTCClientCtrl extends EventEmitter {
   public onTrackPublish? (tracks: RCRemoteTrack[]): void
   public onTrackUnpublish?(tracks: RCRemoteTrack[]): void
   public onTrackReady?(track: RCRemoteTrack): void
-  public onAudioMuteChange?(audioTrack: RCRemoteAudioTrack): void
-  public onVideoMuteChange?(videoTrack: RCRemoteVideoTrack): void
+  public onAudioMuteChange?(audioTrack: RCRemoteAudioTrack, room: RCRTCRoom): void
+  public onVideoMuteChange?(videoTrack: RCRemoteVideoTrack, room: RCRTCRoom): void
   public onRoomAttributeChange?(name: string, content?: string | undefined): void
 
   public onReportListener? (report: IRCRTCStateReport) :void
