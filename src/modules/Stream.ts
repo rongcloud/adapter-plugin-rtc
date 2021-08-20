@@ -136,12 +136,6 @@ const getEnable = (tracks: RCTrack[]): { audio: boolean, video: boolean } => {
   return enable
 }
 
-const getEnableByMediaStream = (mediaStream: MediaStream): { audio: boolean, video: boolean } => {
-  const audio = !!mediaStream.getAudioTracks()[0]?.enabled
-  const video = !!mediaStream.getVideoTracks()[0]?.enabled
-  return { audio, video }
-}
-
 const tranToV5Resolution = (resolution: Resolution): RCResolution => {
   const arr = resolution.split('_')
   const width = arr[1]
@@ -266,7 +260,6 @@ export class Stream extends BasicModule {
       mediaStream.addTrack(track.__innerGetMediaStreamTrack()!)
 
       const { options, resolve } = data
-      const type = options.stream.type
 
       // 直接查看 mediaStream 中是否已包含了所有订阅的轨道
       if (options.stream.type === StreamType.AUDIO_AND_VIDEO && mediaStream.getTracks().length < 2) {
