@@ -149,6 +149,17 @@ const tranToV5Resolution = (resolution: Resolution): RCResolution => {
   return `W${width}_H${height}` as RCResolution
 }
 
+const getEnableByTrack = (track: RCRemoteTrack, room: RCRTCRoom) => {
+  const msid = track.getStreamId()
+  const audioTrack = track.isAudioTrack() ? track : room.getRemoteTrack(msid + '_0')
+  const videoTrack = track.isVideoTrack() ? track : room.getRemoteTrack(msid + '_1')
+
+  return {
+    audio: !!(audioTrack && !(audioTrack.isLocalMuted() || audioTrack.isOwnerMuted())),
+    video: !!(videoTrack && !(videoTrack.isLocalMuted() || videoTrack.isOwnerMuted()))
+  }
+}
+
 export class Stream extends BasicModule {
   private readonly _options: IStreamInitOptions
 
@@ -159,7 +170,6 @@ export class Stream extends BasicModule {
     resolve: (data: IUserRes<IOutputInfo>) => void,
     reject: (reason?: any) => void,
     options: IUserRes<IResInfo>,
-    tracks: RCRemoteTrack[]
   }} = {}
 
   private static readonly _streamMaps: { [msid: string]: MediaStream } = {}
@@ -239,53 +249,53 @@ export class Stream extends BasicModule {
         unpublished({ id, stream: { tag, type, enable: getEnable(arr) } })
       }
     }
-    this._ctrl.onTrackReady = (track) => {
+
+    this._ctrl.onTrackReady = (track, room) => {
       const msid = track.getStreamId()
-      const mediaStream = Stream._streamMaps[msid] = Stream._streamMaps[msid] || new MediaStream()
-      // 清理原轨道数据
-      const tracks = track.isAudioTrack() ? mediaStream.getAudioTracks() : mediaStream.getVideoTracks()
-      tracks.forEach(item => mediaStream.removeTrack(item))
-
       const data = _this._promiseMaps[msid]
-      if (data) {
-        const { options, resolve, tracks } = data
-        _this._promiseMaps[msid].tracks.push(track)
-        tracks.forEach(track => mediaStream.addTrack(track.__innerGetMediaStreamTrack()!))
 
-        if (options.stream.type === StreamType.AUDIO_AND_VIDEO && mediaStream.getTracks().length < 2) {
-          return
-        }
-        delete _this._promiseMaps[msid]
-
-        resolve({
-          id: options.id,
-          stream: {
-            ...options.stream,
-            mediaStream,
-            enable: getEnableByMediaStream(mediaStream)
-          }
-        })
+      if (!data) {
+        return
       }
+
+      const mediaStream = Stream._streamMaps[msid] = Stream._streamMaps[msid] || new MediaStream()
+
+      // 清理原轨道同类型数据，填充新 MediaStreamTrack 实例
+      const msTracks = track.isAudioTrack() ? mediaStream.getAudioTracks() : mediaStream.getVideoTracks()
+      msTracks.forEach(item => mediaStream.removeTrack(item))
+      mediaStream.addTrack(track.__innerGetMediaStreamTrack()!)
+
+      const { options, resolve } = data
+      const type = options.stream.type
+
+      // 直接查看 mediaStream 中是否已包含了所有订阅的轨道
+      if (options.stream.type === StreamType.AUDIO_AND_VIDEO && mediaStream.getTracks().length < 2) {
+        return
+      }
+      delete _this._promiseMaps[msid]
+
+      resolve({
+        id: options.id,
+        stream: {
+          ...options.stream,
+          mediaStream,
+          enable: getEnableByTrack(track, room)
+        }
+      })
     }
 
     const onMediaMuteChange = (type: StreamType, track: RCRemoteTrack, room: RCRTCRoom, handle: (user: IUserRes<IOutputInfo>) => void) => {
       if (!handle) {
         return
       }
-      const msid = track.getStreamId()
-      const audioTrack = track.isAudioTrack() ? track : room.getRemoteTrack(msid + '_0')
-      const videoTrack = track.isVideoTrack() ? track : room.getRemoteTrack(msid + '_1')
-
+      const enable = getEnableByTrack(track, room)
       handle({
         id: track.getUserId(),
         stream: {
           tag: track.getTag(),
           type,
           mediaStream: Stream._streamMaps[track.getStreamId()],
-          enable: {
-            audio: !!(audioTrack && !(audioTrack.isLocalMuted() || audioTrack.isOwnerMuted())),
-            video: !!(videoTrack && !(videoTrack.isLocalMuted() || videoTrack.isOwnerMuted()))
-          }
+          enable
         }
       })
     }
@@ -386,7 +396,7 @@ export class Stream extends BasicModule {
     const userId = track.getUserId()
 
     return new Promise((resolve, reject) => {
-      this._promiseMaps[msid] = { resolve, reject, options: { id: userId, stream: { tag, type: StreamType.AUDIO_AND_VIDEO } }, tracks: [] }
+      this._promiseMaps[msid] = { resolve, reject, options: { id: userId, stream: { tag, type: StreamType.AUDIO_AND_VIDEO } } }
     })
   }
 
@@ -403,22 +413,35 @@ export class Stream extends BasicModule {
     const { tag, type } = stream
     const trackIds = parseTrackIds(type, userId, tag)
 
-    // TODO:
-    // 需订阅的资源是否已有部分或全部订阅
-    // 已全部订阅的资源，直接返回相应流
-    // 已订阅部分的资源，等待剩余部分订阅完成后返回的 onTrackReady 通知
-
     return this._ctrl.checkRoomThen(async room => {
-      const tracks = trackIds.map(id => room.getRemoteTrack(id)!).filter(item => !!item)
-      if (tracks.length === 0) {
-        logger.error(`cannot found tracks to sub, tracks.length is 0 -> options: ${JSON.stringify({
+      const tracks = trackIds.map(id => room.getRemoteTrack(id)!)
+
+      // 订阅列表为空或存在非法资源
+      if (trackIds.length === 0 || tracks.some(item => !item)) {
+        logger.error(`subscribe failed. wrong params -> options: ${JSON.stringify({
           id: userId, stream: { tag, type }
         })}`)
         return Promise.reject({ code: RCRTCCode.PARAMS_ERROR })
       }
+
       const msid = tracks[0].getStreamId()
+
+      // 已全部订阅的资源，直接返回相应流
+      if (tracks.every(item => item.isSubscribed())) {
+        return Promise.resolve({
+          id: userId,
+          stream: {
+            enable: getEnableByTrack(tracks[0], room),
+            mediaStream: Stream._streamMaps[msid],
+            tag,
+            type
+          }
+        })
+      }
+
+      // 其他需要走订阅流程的资源，等待 rtlib 的 onTrackReady 通知时处理差异
       return new Promise<IUserRes<IOutputInfo>>((resolve, reject) => {
-        this._promiseMaps[msid] = { resolve, reject, options: { id: userId, stream: { tag, type } }, tracks: [] }
+        this._promiseMaps[msid] = { resolve, reject, options: { id: userId, stream: { tag, type } } }
         room.subscribe(tracks).then(({ code }) => {
           if (code !== RCRTCCode.SUCCESS) {
             reject({ code })

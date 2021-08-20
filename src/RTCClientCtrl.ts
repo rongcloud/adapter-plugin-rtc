@@ -157,7 +157,7 @@ export class RTCClientCtrl extends EventEmitter {
         _this.onTrackUnpublish?.(track)
       },
       onTrackReady (track) {
-        _this.onTrackReady?.(track)
+        _this.onTrackReady?.(track, room)
       },
       onAudioMuteChange (track) {
         _this.onAudioMuteChange?.(track, room)
@@ -177,7 +177,7 @@ export class RTCClientCtrl extends EventEmitter {
   public onMessageReceive? (name: string, content: any, senderUserId: string, messageUId: string): void
   public onTrackPublish? (tracks: RCRemoteTrack[]): void
   public onTrackUnpublish?(tracks: RCRemoteTrack[]): void
-  public onTrackReady?(track: RCRemoteTrack): void
+  public onTrackReady?(track: RCRemoteTrack, room: RCRTCRoom): void
   public onAudioMuteChange?(audioTrack: RCRemoteAudioTrack, room: RCRTCRoom): void
   public onVideoMuteChange?(videoTrack: RCRemoteVideoTrack, room: RCRTCRoom): void
   public onRoomAttributeChange?(name: string, content?: string | undefined): void
