@@ -196,6 +196,8 @@ export class Stream extends BasicModule {
     }
 
     this._ctrl.onTrackPublish = (tracks) => {
+      logger.info(`onTrackPublish -> ${tracks.map(item => item.getTrackId())}`)
+
       const published = this._options.published
       if (!published) {
         return
@@ -220,6 +222,8 @@ export class Stream extends BasicModule {
       }
     }
     this._ctrl.onTrackUnpublish = (tracks) => {
+      logger.info(`onTrackUnpublish -> ${tracks.map(item => item.getTrackId())}`)
+
       const unpublished = _this._options.unpublished
       if (!unpublished) {
         return
