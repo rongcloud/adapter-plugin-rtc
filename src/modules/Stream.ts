@@ -258,7 +258,7 @@ export class Stream extends BasicModule {
       const msTracks = track.isAudioTrack() ? mediaStream.getAudioTracks() : mediaStream.getVideoTracks()
       msTracks.length && msTracks.forEach(item => mediaStream.removeTrack(item))
       const msTrack = track.__innerGetMediaStreamTrack()!
-      logger.debug(`onTrackReady -> msid: ${msid}, kind: ${msTrack.kind}, muted: ${msTrack.muted}, enabled: ${msTrack.enabled}, id: ${msTrack.id}`)
+      logger.debug(`onTrackReady -> msid: ${msid}, kind: ${msTrack.kind}, muted: ${msTrack.muted}, enabled: ${msTrack.enabled}, id: ${msTrack.id}, readyState: ${msTrack.readyState}`)
       mediaStream.addTrack(msTrack)
 
       const { options, resolve } = data
