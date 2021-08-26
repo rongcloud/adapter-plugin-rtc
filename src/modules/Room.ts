@@ -1,5 +1,6 @@
 import { RCMediaType, RCRTCCode, RCTrack } from '@rongcloud/plugin-rtc'
 import { IJoineResult } from '../interfaces/IJoinedData'
+import logger from '../logger'
 import { BasicModule } from './Basic'
 
 export interface IRoomInitOptions {
@@ -18,9 +19,18 @@ export class Room extends BasicModule {
   constructor (options: IRoomInitOptions) {
     super()
     this._options = { ...options }
-    this._ctrl.onUserJoin = (ids) => ids.forEach(id => options.joined?.({ id }))
-    this._ctrl.onUserLeave = (ids) => ids.forEach(id => options.left?.({ id }))
-    this._ctrl.onKickOff = () => options.kick?.()
+    this._ctrl.onUserJoin = (ids) => {
+      logger.info(`onUserJoin -> ${ids.join(', ')}`)
+      ids.forEach(id => options.joined?.({ id }))
+    }
+    this._ctrl.onUserLeave = (ids) => {
+      logger.info(`onUserLeave -> ${ids.join(', ')}`)
+      ids.forEach(id => options.left?.({ id }))
+    }
+    this._ctrl.onKickOff = () => {
+      logger.info('onKickOff ->')
+      options.kick?.()
+    }
   }
 
   async join (): Promise<IJoineResult> {

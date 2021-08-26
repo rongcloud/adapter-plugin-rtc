@@ -338,6 +338,8 @@ export class Stream extends BasicModule {
   }
 
   async publish (options: { stream: IStreamInfo }): Promise<{ liveUrl?: string }> {
+    logger.info(`publish -> ${JSON.stringify({ stream: { tag: options.stream.tag, type: options.stream.type } })}`)
+
     const { tag, type, mediaStream } = options.stream
     const withoutAudio = type === StreamType.VIDEO
     const withoutVideo = type === StreamType.AUDIO
@@ -360,6 +362,8 @@ export class Stream extends BasicModule {
   }
 
   unpublish (options: { stream: IResInfo }) {
+    logger.info(`unpublish -> ${JSON.stringify({ stream: { tag: options.stream.tag, type: options.stream.type } })}`)
+
     const { tag, type } = options.stream
     const userId = this._ctrl.getRTCClient().getCurrentId()
     const trackIds = parseTrackIds(type, userId, tag)
@@ -476,13 +480,18 @@ export class Stream extends BasicModule {
   unsubscribe (options?: IUserRes<IResInfo>) {
     const mode = this._ctrl.getRTCMode()
     const role = this._ctrl.getLiveRole()
+
     if (mode === Mode.LIVE && role === ROLE.AUDIENCE) {
+      logger.info('unsubscribe liveurl.')
       return this._unsubLiveAsAudience()
     }
+
+    logger.info(`unsubscribe -> ${JSON.stringify({ id: options!.id, stream: { tag: options!.stream.tag, type: options!.stream.type } })}`)
     return this._unsubscribe(options!)
   }
 
   resize (options: IUserRes<{ tag: string, size: StreamSize }>) {
+    logger.info(`resize -> ${JSON.stringify({ id: options.id, stream: { tag: options.stream.tag, size: options.stream.size } })}`)
     const { id, stream } = options
     const { tag, size } = stream
     const trackIds = parseTrackIds(StreamType.VIDEO, id, tag)
@@ -497,6 +506,7 @@ export class Stream extends BasicModule {
   }
 
   setMixConfig (options: IMCUConfigInfo): Promise<void> {
+    logger.info(`setMixConfig -> ${JSON.stringify(options)}`)
     return this._ctrl.checkAuchorThen(async room => {
       const builder = room.getMCUConfigBuilder()
       builder.setMixLayoutMode(options.layoutMode)
