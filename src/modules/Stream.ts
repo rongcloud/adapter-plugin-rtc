@@ -256,8 +256,10 @@ export class Stream extends BasicModule {
 
       // 清理原轨道同类型数据，填充新 MediaStreamTrack 实例
       const msTracks = track.isAudioTrack() ? mediaStream.getAudioTracks() : mediaStream.getVideoTracks()
-      msTracks.forEach(item => mediaStream.removeTrack(item))
-      mediaStream.addTrack(track.__innerGetMediaStreamTrack()!)
+      msTracks.length && msTracks.forEach(item => mediaStream.removeTrack(item))
+      const msTrack = track.__innerGetMediaStreamTrack()!
+      logger.debug(`onTrackReady -> msid: ${msid}, kind: ${msTrack.kind}, muted: ${msTrack.muted}, enabled: ${msTrack.enabled}, id: ${msTrack.id}`)
+      mediaStream.addTrack(msTrack)
 
       const { options, resolve } = data
 
