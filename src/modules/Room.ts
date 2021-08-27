@@ -7,7 +7,7 @@ export interface IRoomInitOptions {
   id: string
   joined? (user: { id: string }): void
   left? (user: { id: string }): void
-  kick? (): void
+  kick? (byServer?: boolean): void
 }
 
 export interface IUserState { mediaType: RCMediaType, state: 0 | 1, tag: string }
@@ -27,9 +27,9 @@ export class Room extends BasicModule {
       logger.info(`onUserLeave -> ${ids.join(', ')}`)
       ids.forEach(id => options.left?.({ id }))
     }
-    this._ctrl.onKickOff = () => {
-      logger.info('onKickOff ->')
-      options.kick?.()
+    this._ctrl.onKickOff = (bool) => {
+      logger.info(`onKickOff -> byServer: ${bool}`)
+      options.kick?.(bool)
     }
   }
 

@@ -145,7 +145,7 @@ export class RTCClientCtrl extends EventEmitter {
         _this.onUserLeave?.(userIds)
       },
       onKickOff (byServer) {
-        _this.onKickOff?.()
+        _this.onKickOff?.(byServer)
       },
       onMessageReceive (name: string, content: any, senderUserId: string, messageUId: string) {
         _this.onMessageReceive?.(name, content, senderUserId, messageUId)
@@ -173,7 +173,7 @@ export class RTCClientCtrl extends EventEmitter {
 
   public onUserJoin? (userIds: string[]): void
   public onUserLeave? (userIds: string[]): void
-  public onKickOff? (): void
+  public onKickOff? (byServer: boolean): void
   public onMessageReceive? (name: string, content: any, senderUserId: string, messageUId: string): void
   public onTrackPublish? (tracks: RCRemoteTrack[]): void
   public onTrackUnpublish?(tracks: RCRemoteTrack[]): void
