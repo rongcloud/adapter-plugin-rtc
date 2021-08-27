@@ -429,18 +429,21 @@ export class Stream extends BasicModule {
 
       const msid = tracks[0].getStreamId()
 
+      // 此处不可检测内存态状态，因业务层可能并行调用 unsub 和 sub 且多次调用，SDK 内部是队列事务处理，
+      // 会导致事务当前检测用的内存态数据在业务真实执行时过期
+
       // 已全部订阅的资源，直接返回相应流
-      if (tracks.every(item => item.isSubscribed())) {
-        return Promise.resolve({
-          id: userId,
-          stream: {
-            enable: getEnableByTrack(tracks[0], room),
-            mediaStream: Stream._streamMaps[msid],
-            tag,
-            type
-          }
-        })
-      }
+      // if (tracks.every(item => item.isSubscribed())) {
+      //   return Promise.resolve({
+      //     id: userId,
+      //     stream: {
+      //       enable: getEnableByTrack(tracks[0], room),
+      //       mediaStream: Stream._streamMaps[msid],
+      //       tag,
+      //       type
+      //     }
+      //   })
+      // }
 
       // 其他需要走订阅流程的资源，等待 rtlib 的 onTrackReady 通知时处理差异
       return new Promise<IUserRes<IOutputInfo>>((resolve, reject) => {
