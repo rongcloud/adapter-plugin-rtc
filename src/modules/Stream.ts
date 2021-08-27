@@ -160,11 +160,11 @@ export class Stream extends BasicModule {
   public readonly video: IVideoNode
   public readonly audio: IAudioNode
 
-  private readonly _promiseMaps: { [msid: string]: {
-    resolve: (data: IUserRes<IOutputInfo>) => void,
-    reject: (reason?: any) => void,
-    options: IUserRes<IResInfo>,
-  }} = {}
+  // private readonly _promiseMaps: { [msid: string]: {
+  //   resolve: (data: IUserRes<IOutputInfo>) => void,
+  //   reject: (reason?: any) => void,
+  //   options: IUserRes<IResInfo>,
+  // }} = {}
 
   private static readonly _streamMaps: { [msid: string]: MediaStream } = {}
 
@@ -248,14 +248,8 @@ export class Stream extends BasicModule {
       }
     }
 
-    this._ctrl.onTrackReady = (track, room) => {
+    this._ctrl.onTrackReady = (track) => {
       const msid = track.getStreamId()
-      const data = _this._promiseMaps[msid]
-
-      if (!data) {
-        return
-      }
-
       const mediaStream = Stream._streamMaps[msid] = Stream._streamMaps[msid] || new MediaStream()
 
       // 清理原轨道同类型数据，填充新 MediaStreamTrack 实例
@@ -264,23 +258,6 @@ export class Stream extends BasicModule {
       const msTrack = track.__innerGetMediaStreamTrack()!
       logger.debug(`onTrackReady -> msid: ${msid}, kind: ${msTrack.kind}, muted: ${msTrack.muted}, enabled: ${msTrack.enabled}, id: ${msTrack.id}, readyState: ${msTrack.readyState}`)
       mediaStream.addTrack(msTrack)
-
-      const { options, resolve } = data
-
-      // 直接查看 mediaStream 中是否已包含了所有订阅的轨道
-      if (options.stream.type === StreamType.AUDIO_AND_VIDEO && mediaStream.getTracks().length < 2) {
-        return
-      }
-      delete _this._promiseMaps[msid]
-
-      resolve({
-        id: options.id,
-        stream: {
-          ...options.stream,
-          mediaStream,
-          enable: getEnableByTrack(track, room)
-        }
-      })
     }
 
     const onMediaMuteChange = (type: StreamType, track: RCRemoteTrack, room: RCRTCRoom, handle: (user: IUserRes<IOutputInfo>) => void) => {
@@ -398,8 +375,19 @@ export class Stream extends BasicModule {
     const tag = track.getTag()
     const userId = track.getUserId()
 
-    return new Promise((resolve, reject) => {
-      this._promiseMaps[msid] = { resolve, reject, options: { id: userId, stream: { tag, type: StreamType.AUDIO_AND_VIDEO } } }
+    return new Promise(resolve => {
+      setTimeout(() => resolve({
+        id: userId,
+        stream: {
+          tag,
+          type: options.type,
+          enable: {
+            audio: true,
+            video: options.type !== StreamType.AUDIO
+          },
+          mediaStream: Stream._streamMaps[track.getStreamId()]
+        }
+      }))
     })
   }
 
@@ -432,26 +420,32 @@ export class Stream extends BasicModule {
       // 此处不可检测内存态状态，因业务层可能并行调用 unsub 和 sub 且多次调用，SDK 内部是队列事务处理，
       // 会导致事务当前检测用的内存态数据在业务真实执行时过期
 
-      // 已全部订阅的资源，直接返回相应流
-      // if (tracks.every(item => item.isSubscribed())) {
-      //   return Promise.resolve({
-      //     id: userId,
-      //     stream: {
-      //       enable: getEnableByTrack(tracks[0], room),
-      //       mediaStream: Stream._streamMaps[msid],
-      //       tag,
-      //       type
-      //     }
-      //   })
-      // }
-
       // 其他需要走订阅流程的资源，等待 rtlib 的 onTrackReady 通知时处理差异
       return new Promise<IUserRes<IOutputInfo>>((resolve, reject) => {
-        this._promiseMaps[msid] = { resolve, reject, options: { id: userId, stream: { tag, type } } }
         room.subscribe(tracks).then(({ code }) => {
           if (code !== RCRTCCode.SUCCESS) {
+            logger.warn(`subscribe failed. -> code: ${code}, options: ${JSON.stringify({
+              id: userId, stream: { tag, type }
+            })}`)
             reject({ code })
-            delete this._promiseMaps[msid]
+          } else {
+            logger.info(`subscribe success. -> options: ${JSON.stringify({
+              id: userId, stream: { tag, type }
+            })}`)
+            const msid = [userId, tag].join('_')
+            // 为避免重复订阅时，收不到 onTrackReady 回调
+            setTimeout(() => {
+              const mediaStream = Stream._streamMaps[msid]
+              resolve({
+                id: userId,
+                stream: {
+                  tag,
+                  type,
+                  mediaStream,
+                  enable: getEnableByTrack(tracks[0], room)
+                }
+              })
+            })
           }
         })
       })
