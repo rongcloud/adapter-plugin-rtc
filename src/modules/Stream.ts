@@ -475,8 +475,10 @@ export class Stream extends BasicModule {
       if (tracks.length === 0) return
       const { code } = await room.unsubscribe(tracks)
       if (code !== RCRTCCode.SUCCESS) {
+        logger.warn(`unsubscribe failed -> code: ${code}, options: ${JSON.stringify({ id: options!.id, stream: { tag: options!.stream.tag, type: options!.stream.type } })}`)
         return Promise.reject({ code })
       }
+      logger.info(`unsubscribe success -> ${JSON.stringify({ id: options!.id, stream: { tag: options!.stream.tag, type: options!.stream.type } })}`)
     })
   }
 
