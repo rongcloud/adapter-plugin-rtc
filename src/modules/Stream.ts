@@ -375,19 +375,37 @@ export class Stream extends BasicModule {
     const tag = track.getTag()
     const userId = track.getUserId()
 
-    return new Promise(resolve => {
-      setTimeout(() => resolve({
-        id: userId,
-        stream: {
-          tag,
-          type: options.type,
-          enable: {
-            audio: true,
-            video: options.type !== StreamType.AUDIO
-          },
-          mediaStream: Stream._streamMaps[track.getStreamId()]
-        }
-      }))
+    // 无流等待
+    if (tracks.some(item => !item.__innerGetMediaStreamTrack())) {
+      await new Promise<void>((resolve) => {
+        audience.registerTrackEventListener({
+          onTrackReady () {
+            if (tracks.every(item => item.__innerGetMediaStreamTrack())) {
+              resolve()
+            }
+          }
+        })
+      })
+    }
+
+    const mediaStream = Stream._streamMaps[msid] = Stream._streamMaps[msid] || new MediaStream()
+    mediaStream.getTracks().forEach(item => mediaStream.removeTrack(item))
+    tracks.forEach(track => {
+      const msTrack = track.__innerGetMediaStreamTrack()!
+      mediaStream.addTrack(msTrack)
+    })
+
+    return Promise.resolve({
+      id: userId,
+      stream: {
+        tag,
+        type: options.type,
+        enable: {
+          audio: true,
+          video: options.type !== StreamType.AUDIO
+        },
+        mediaStream
+      }
     })
   }
 
@@ -414,8 +432,6 @@ export class Stream extends BasicModule {
         })}`)
         return Promise.reject({ code: RCRTCCode.PARAMS_ERROR })
       }
-
-      const msid = tracks[0].getStreamId()
 
       // 此处不可检测内存态状态，因业务层可能并行调用 unsub 和 sub 且多次调用，SDK 内部是队列事务处理，
       // 会导致事务当前检测用的内存态数据在业务真实执行时过期
