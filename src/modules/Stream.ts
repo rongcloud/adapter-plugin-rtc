@@ -360,7 +360,7 @@ export class Stream extends BasicModule {
     })
   }
 
-  private async _subLiveAsAudience (options: ISubLiveOptions): Promise<IUserRes<IOutputInfo>> {
+  private async _subLiveAsAudience (options: ISubLiveOptions): Promise<{ mediaStream: MediaStream }> {
     const audience = this._ctrl.getRTCClient().getAudienceClient()
     const livingType: RCLivingType = options.type === StreamType.AUDIO ? RCLivingType.AUDIO : RCLivingType.VIDEO
     const mediaType: RCMediaType = options.type === StreamType.AUDIO ? RCMediaType.AUDIO_ONLY : RCMediaType.AUDIO_VIDEO
@@ -372,8 +372,6 @@ export class Stream extends BasicModule {
 
     const track = tracks[0]
     const msid = track.getStreamId()
-    const tag = track.getTag()
-    const userId = track.getUserId()
 
     // 无流等待
     if (tracks.some(item => !item.__innerGetMediaStreamTrack())) {
@@ -395,18 +393,7 @@ export class Stream extends BasicModule {
       mediaStream.addTrack(msTrack)
     })
 
-    return Promise.resolve({
-      id: userId,
-      stream: {
-        tag,
-        type: options.type,
-        enable: {
-          audio: true,
-          video: options.type !== StreamType.AUDIO
-        },
-        mediaStream
-      }
-    })
+    return { mediaStream }
   }
 
   private async _unsubLiveAsAudience (): Promise<void> {
@@ -468,7 +455,7 @@ export class Stream extends BasicModule {
     })
   }
 
-  subscribe (options: IUserRes<IResInfo> | ISubLiveOptions): Promise<IUserRes<IOutputInfo>> {
+  subscribe (options: IUserRes<IResInfo> | ISubLiveOptions): Promise<IUserRes<IOutputInfo>|{ mediaStream: MediaStream }> {
     const mode = this._ctrl.getRTCMode()
     const role = this._ctrl.getLiveRole()
     if (mode === Mode.LIVE && role === ROLE.AUDIENCE) {
